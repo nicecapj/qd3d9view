@@ -343,6 +343,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\defineForTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\QD3D9View.cpp"
 				>
 			</File>

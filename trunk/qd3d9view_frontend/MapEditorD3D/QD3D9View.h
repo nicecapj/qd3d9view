@@ -24,7 +24,7 @@
 #include <DxErr.h>
 #pragma comment(lib,"DxErr.lib")
 //------------------------------------------------------------------------------
-class QD3DWiew : QWidget
+class QD3DWiew : public QWidget
 {
 public:	
 	QD3DWiew(QWidget *parent = 0, Qt::WFlags flags = 0);
@@ -32,11 +32,10 @@ public:
 
 
 	HRESULT Initialize();
-	void	Uninitialize();
-	
+	void	Finalize();
+
 	const IDirect3D9*	GetD3D() { return pD3D_; }
 	const IDirect3DDevice9* GetD3DDevice() { return pDevice_; }	
-
 
 protected:
 	// Event handlers
@@ -87,14 +86,15 @@ protected:
 	//virtual void inputMethodEvent(QInputMethodEvent *);
 
 private:
+	void Update(float time);
+
 	void PreRender();
 	void Render();
 	void PostRender();
 	
 	HRESULT	BeginScene();
 	HRESULT	EndScene();
-	HRESULT	Present();
-	
+	HRESULT	Present();	
 
 	HRESULT	RestoreDeviceObjects();
 	HRESULT InvalidateDeviceObjects();
@@ -102,6 +102,12 @@ private:
 	void	ClearScene( D3DXCOLOR ClearColor, float Z=1.0f, DWORD Stencil=0 );
 	void	ClearRenderTarget( D3DXCOLOR ClearColor );
 	void	ClearDepthStencil( float Z=1.0f, DWORD Stencil=0 );
+
+	//test
+	void	SetupGeometryForTest();
+	HRESULT InitGeometryForTest();
+	void	RenderGeometryForTest();
+
 
 	LPDIRECT3DVERTEXBUFFER9         pVB_;
 	LPDIRECT3DINDEXBUFFER9          pIB_;
@@ -112,10 +118,12 @@ private:
 	
 	LPDIRECT3DPIXELSHADER9			pPixelShader_;
 	
-	IDirect3D9*				pD3D_;
-	IDirect3DDevice9*		pDevice_;
+	IDirect3D9*						pD3D_;
+	IDirect3DDevice9*				pDevice_;
 
-	D3DPRESENT_PARAMETERS	d3dParam_;
+	D3DPRESENT_PARAMETERS			d3dParam_;	
+
+	bool isWireMode_;	
 };
 
 #endif  __QT_DIRECTX_WIEW_H__

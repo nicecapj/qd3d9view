@@ -10,7 +10,6 @@
 
 bool QD3DWiew::winEvent(MSG *message, long *result)
 {
-
 	if(SUCCEEDED(DefWindowProc(message->hwnd, message->message, message->wParam, message->lParam)))
 		*result = 1;
 	else 
@@ -18,24 +17,25 @@ bool QD3DWiew::winEvent(MSG *message, long *result)
 
 	switch(message->message)
 	{
-	case WM_PAINT:
+	case WM_ACTIVATEAPP:
 		{
+			Update(0);
 			PreRender();
 			Render();
 			PostRender();
 		}
 		break;
+	case WM_PAINT:
+		{			
+		}
+		break;
 	case WM_SHOWWINDOW:
 		{
-			PreRender();
-			Render();
-			PostRender();
 		}
 		break;
 
 	case WM_CLOSE:
 		{
-
 		}
 		break;
 	default:
@@ -80,6 +80,7 @@ void QD3DWiew::closeEvent(QCloseEvent *)
 
 void QD3DWiew::paintEvent(QPaintEvent *)
 {
+	//Update()
 	PreRender();
 	Render();
 	PostRender();

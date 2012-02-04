@@ -23,6 +23,8 @@ MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 
 			SAFE_DELETE(pD3DWidget_);
 		}
+
+		pD3DWidget_->show();
 	}
 }
 
