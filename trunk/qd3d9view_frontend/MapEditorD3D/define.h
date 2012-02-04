@@ -1,3 +1,11 @@
+/********************************************************************
+	created:	2012/02/05
+	created:	2012:5:2   2:38
+	filename: 	define.h		
+	author:		DRAGONKING(gmail.com)
+	
+	purpose:	common define
+*********************************************************************/
 #ifndef __DEFINE_H__
 
 #include <vector>

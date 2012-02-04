@@ -11,6 +11,8 @@ MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 	pD3DWidget_ = new QD3DWiew(this);
 	if(pD3DWidget_)
 	{
+		setCentralWidget(pD3DWidget_);	//안해주면 엄한 위치에 붙어있다.
+
 		HRESULT hr;
 		if(FAILED(hr = pD3DWidget_->Initialize()))
 		{
@@ -24,7 +26,7 @@ MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 			SAFE_DELETE(pD3DWidget_);
 		}
 
-		pD3DWidget_->show();
+		//pD3DWidget_->show();
 	}
 }
 
