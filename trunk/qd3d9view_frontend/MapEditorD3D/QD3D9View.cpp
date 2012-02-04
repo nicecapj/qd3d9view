@@ -2,7 +2,7 @@
 created:	2012/02/04
 created:	2012:4:2   15:45
 filename: 	QD3D9View.h		
-author:		DRAGONKING(nicecapj@naver.com)
+author:		DRAGONKING(gmail.com)
 
 purpose:	directx 9.0 control for QT
 *******************************************************************************/
@@ -13,13 +13,10 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 :pD3D_(0), pDevice_(0)
 ,pVB_(0), pIB_(0), pVertexShader_(0), pConstantTable_(0), pVertexDeclaration_(0)
 ,pPixelShader_(0)
-{
-	//서피스나 버퍼를 프레임버퍼에 바로 쓰게된다. 속도 향상은 있으나, 깜빡임이 있을수 있다.
-	//알파블렌딩에 문제가 있을수 있다고 하는데 일단 써보자.
-	setAttribute(Qt::WA_PaintOnScreen);	
-	setAttribute(Qt::WA_NoSystemBackground);
-	//부모 위젯이 다시 그려질때 자식도 그려지는데, 이것을 안하도록 하는 플래그
-	setAttribute(Qt::WA_OpaquePaintEvent); 
+{	
+	setAttribute(Qt::WA_PaintOnScreen);		//speed up! so... can make flicking....
+	setAttribute(Qt::WA_NoSystemBackground);		
+	setAttribute(Qt::WA_OpaquePaintEvent);	//don`t redraw by parent.
 
 
 }
@@ -126,11 +123,11 @@ HRESULT QD3DWiew::Initialize()
 		}
 	}
 
-	//하드웨어로 우선 생성해본후, 실패시 소프트웨어로 생성한다.
+	//if can`t create h/w device, create software.
 	hr = pD3D_->CreateDevice(
 		D3DADAPTER_DEFAULT,
 		D3DDEVTYPE_HAL,
-		winId(),//qt의 winId()함수가 윈도우핸들 리턴
+		winId(),//return windows handle
 		BehaviorFlags,
 		&d3dParam_,
 		&pDevice_ );
@@ -163,7 +160,6 @@ void QD3DWiew::Uninitialize()
 
 }
 
-//디바이스 소실시 처리한다.
 HRESULT	QD3DWiew::RestoreDeviceObjects()
 {
 	if(!pDevice_)
@@ -172,7 +168,6 @@ HRESULT	QD3DWiew::RestoreDeviceObjects()
 	return S_OK;
 }
 
-//소실된 장치가 복구될 수 있다면, 모든 비디오메모리 자원/스왑체인을 파괴한다.
 HRESULT QD3DWiew::InvalidateDeviceObjects()
 {
 	if(!pDevice_)
