@@ -1,0 +1,29 @@
+<UI version="4.0" >
+ <class>MapEditorD3DClass</class>
+ <widget class="QMainWindow" name="MapEditorD3DClass" >
+  <property name="objectName" >
+   <string notr="true">MapEditorD3DClass</string>
+  </property>
+  <property name="geometry" >
+   <rect>
+	<x>0</x>
+	<y>0</y>
+	<width>600</width>
+	<height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>MapEditorD3D</string>
+  </property>
+  <widget class="QMenuBar" name="menuBar" />
+  <widget class="QToolBar" name="mainToolBar" />
+  <widget class="QWidget" name="centralWidget" />
+  <widget class="QStatusBar" name="statusBar" />
+ </widget>
+ <layoutDefault spacing="6" margin="11" />
+ <pixmapfunction></pixmapfunction>
+ <resources>
+   <include location="mapeditord3d.qrc"/>
+ </resources>
+ <connections/>
+</UI>
