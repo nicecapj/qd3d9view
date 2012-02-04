@@ -12,13 +12,23 @@ purpose:	directx 9.0 control for QT
 #include "defineForTest.h"
 
 QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
-:pD3D_(0), pDevice_(0)
+:QWidget( parent, flags )
+,pD3D_(0), pDevice_(0)
 ,pVB_(0), pIB_(0), pVertexShader_(0), pConstantTable_(0), pVertexDeclaration_(0)
-,pPixelShader_(0), isWireMode_(false)
+,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0)
 {	
-	setAttribute(Qt::WA_PaintOnScreen);		//speed up! so... can make flicking....
+	//버퍼에서 버퍼로 복사후 프레임버퍼로 복사하게 되는데, 버퍼에서 바로 프레임버퍼로 복사하게 한다.
+	//성능향상이 있지만 깜빡임이 나타날 수 있다.
+	//알파블렌드에 영향을 줄 수 있으나, 다이렉트 엑스에게는 모르겠다.
+	setAttribute(Qt::WA_PaintOnScreen);		
 	setAttribute(Qt::WA_NoSystemBackground);		
-	setAttribute(Qt::WA_OpaquePaintEvent);	//don`t redraw by parent.
+	//부모에서 리드로우가 일어나면, 자식에게도 리드로우가 호출되는데, 그것을 막는다.
+	setAttribute(Qt::WA_OpaquePaintEvent);
+
+	timer_.setParent( parent );
+	timer_.setInterval(0);	//최대 해상도로 1/1000
+	timer_.setSingleShot( false ) ;		//정해진 시간후에 한번 호출하는 방식은 사용하지 않는다.
+	QObject::connect( &timer_, SIGNAL( timeout() ), this, SLOT( Idle() ) ) ;
 }
 
 QD3DWiew::~QD3DWiew()
@@ -36,7 +46,7 @@ void QD3DWiew::Render()
 
 	ClearScene( D3DXCOLOR( 0.0f, 0.f, 0.f, 0.f ), 1.0f, 0 );
 
-	if( SUCCEEDED(BeginScene()) )
+	if( SUCCEEDED(hr = BeginScene()) )
 	{
 		if(isWireMode_)
 			pDevice_->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
@@ -45,6 +55,7 @@ void QD3DWiew::Render()
 				
 		SetupGeometryForTest();
 		RenderGeometryForTest();
+		DrawFPS();
 
 		EndScene();
 	}
@@ -210,6 +221,10 @@ HRESULT QD3DWiew::Initialize()
 	}
 
 	
+
+	timer_.start();
+
+	InitializeFont();
 	InitGeometryForTest();
 
 	return S_OK;
@@ -219,10 +234,14 @@ void QD3DWiew::Finalize()
 {
 	InvalidateDeviceObjects();
 
+	SAFE_RELEASE(pFont_);
+
 	SAFE_RELEASE(pVB_);
 	SAFE_RELEASE(pIB_);
 	SAFE_RELEASE(pDevice_);
 	SAFE_RELEASE(pD3D_);	
+
+	timer_.stop();
 }
 
 HRESULT	QD3DWiew::RestoreDeviceObjects()
@@ -259,7 +278,7 @@ void QD3DWiew::ClearDepthStencil(float Z, DWORD Stencil)
 
 }
 
-void QD3DWiew::Update(float time)
+void QD3DWiew::Update()
 {
 
 }
@@ -279,18 +298,21 @@ void QD3DWiew::SetupGeometryForTest()
 	D3DXMATRIXA16 matProj;
 	D3DXMatrixPerspectiveFovLH( &matProj, D3DX_PI / 4, 1.0f, 1.0f, 1000.0f );
 	pDevice_->SetTransform( D3DTS_PROJECTION, &matProj );
+
+	//스크린 공간으로 투영
+	D3DXVec3Project(&screenFontPos_,&objectFontPos_,&viewPort_,&matProj,&matView,&matWorld);
 }
 
 HRESULT QD3DWiew::InitGeometryForTest()
 {
 	CUSTOMVERTEX vertices[] = 
 	{
-		CUSTOMVERTEX(150.f,50.f,0.5f,0xffff0000),
-		CUSTOMVERTEX(250.f,250.f,0.5f,0xffff0000),
-		CUSTOMVERTEX(50.f,250.f,0.5f,0xffff0000),
+		CUSTOMVERTEX(150.f,50.f,0.5f,1.0f, 0xffff0000),
+		CUSTOMVERTEX(250.f,250.f,0.5f,1.0f, 0xffff0000),
+		CUSTOMVERTEX(50.f,250.f,0.5f,1.0f, 0xffff0000),
 	};
 		    
-	if(FAILED(pDevice_->CreateVertexBuffer(3 * sizeof(vertices), 0, D3DFVF_P3F_D, D3DPOOL_DEFAULT, &pVB_, NULL)))
+	if(FAILED(pDevice_->CreateVertexBuffer(3 * sizeof(vertices), 0, D3DFVF_P3RHWF_D, D3DPOOL_DEFAULT, &pVB_, NULL)))
 	{
 		return E_FAIL;
 	}
@@ -303,6 +325,7 @@ HRESULT QD3DWiew::InitGeometryForTest()
 
 	pVB_->Unlock();
 
+	objectFontPos_ = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
 	return S_OK;
 }
@@ -310,6 +333,28 @@ HRESULT QD3DWiew::InitGeometryForTest()
 void QD3DWiew::RenderGeometryForTest()
 {
 	pDevice_->SetStreamSource(0, pVB_, 0, sizeof(CUSTOMVERTEX));
-	pDevice_->SetFVF(D3DFVF_P3F_D);
+	pDevice_->SetFVF(D3DFVF_P3RHWF_D);
 	pDevice_->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+}
+
+void QD3DWiew::idle()
+{
+	appTime_ += timer_.interval() * 0.001;
+
+	Update();
+	PreRender();
+	Render();
+	PostRender();
+}
+
+void QD3DWiew::InitializeFont()
+{
+	hFont_ = (HFONT)GetStockObject(SYSTEM_FONT);
+	D3DXCreateFont(pDevice_, 20, 10, 1, TRUE, 1, 1, 5, 1,  NULL,L"Courier", &pFont_);	
+}
+
+void QD3DWiew::DrawFPS()
+{
+	RECT TextRect = {screenFontPos_.x-50, screenFontPos_.y-25,screenFontPos_.x+50, screenFontPos_.y+25};
+	pFont_->DrawTextA(NULL, "TEST", -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
 }

@@ -11,8 +11,10 @@
 #define __QT_DIRECTX_WIEW_H__
 
 #include <QtGui/QWidget>
+#include <qevent.h>
 #include <d3d9.h>
 #include <d3dx9.h>
+#include <QTimer.h>
 
 #pragma comment(lib,"d3d9.lib")
 #if (defined(_DEBUG) || defined(DEBUG))
@@ -30,12 +32,20 @@ public:
 	QD3DWiew(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~QD3DWiew();
 
-
 	HRESULT Initialize();
 	void	Finalize();
 
+	void Update();
+
+	void PreRender();
+	void Render();
+	void PostRender();
+
 	const IDirect3D9*	GetD3D() { return pD3D_; }
 	const IDirect3DDevice9* GetD3DDevice() { return pDevice_; }	
+
+public slots:
+		void idle();
 
 protected:
 	// Event handlers
@@ -57,7 +67,7 @@ protected:
 //	virtual void leaveEvent(QEvent *);
 	virtual void paintEvent(QPaintEvent *);
 //	virtual void moveEvent(QMoveEvent *);
-//	virtual void resizeEvent(QResizeEvent *);
+	virtual void resizeEvent(QResizeEvent *p_event);
 	virtual void closeEvent(QCloseEvent *);
 
 //#ifndef QT_NO_CONTEXTMENU
@@ -86,12 +96,6 @@ protected:
 	//virtual void inputMethodEvent(QInputMethodEvent *);
 
 private:
-	void Update(float time);
-
-	void PreRender();
-	void Render();
-	void PostRender();
-	
 	HRESULT	BeginScene();
 	HRESULT	EndScene();
 	HRESULT	Present();	
@@ -102,6 +106,10 @@ private:
 	void	ClearScene( D3DXCOLOR ClearColor, float Z=1.0f, DWORD Stencil=0 );
 	void	ClearRenderTarget( D3DXCOLOR ClearColor );
 	void	ClearDepthStencil( float Z=1.0f, DWORD Stencil=0 );
+
+	
+	void InitializeFont();
+	void DrawFPS();
 
 	//test
 	void	SetupGeometryForTest();
@@ -121,9 +129,20 @@ private:
 	IDirect3D9*						pD3D_;
 	IDirect3DDevice9*				pDevice_;
 
-	D3DPRESENT_PARAMETERS			d3dParam_;	
+	D3DPRESENT_PARAMETERS			d3dParam_;		
+		
+	float appTime_;
 
-	bool isWireMode_;	
+	//font
+	HFONT							hFont_;
+	LPD3DXFONT						pFont_;
+	D3DXVECTOR3						screenFontPos_;
+	D3DXVECTOR3						objectFontPos_;
+	D3DVIEWPORT9					viewPort_;
+
+	//for tool
+	bool isWireMode_;		
+	QTimer timer_;
 };
 
 #endif  __QT_DIRECTX_WIEW_H__

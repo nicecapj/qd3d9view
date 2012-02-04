@@ -7,6 +7,7 @@
 	purpose:	process windows message
 *********************************************************************/
 #include "QD3D9View.h"
+#include <qevent.h>
 
 bool QD3DWiew::winEvent(MSG *message, long *result)
 {
@@ -19,10 +20,10 @@ bool QD3DWiew::winEvent(MSG *message, long *result)
 	{
 	case WM_ACTIVATEAPP:
 		{
-			Update(0);
-			PreRender();
-			Render();
-			PostRender();
+			//Update(0);
+			//PreRender();
+			//Render();
+			//PostRender();
 		}
 		break;
 	case WM_PAINT:
@@ -78,10 +79,48 @@ void QD3DWiew::closeEvent(QCloseEvent *)
 
 }
 
-void QD3DWiew::paintEvent(QPaintEvent *)
+void QD3DWiew::paintEvent(QPaintEvent *paintE)
 {
-	//Update()
+	Q_UNUSED(paintE);
+	
+	Update();
 	PreRender();
 	Render();
 	PostRender();
+}
+
+void QD3DWiew::resizeEvent(QResizeEvent *p_event)
+{
+	QSize newSize = size();
+	if(p_event)
+	{
+		newSize = p_event->size();
+		// if( width()==newSize.width() && height()==newSize.height() ) return;
+		QWidget::resizeEvent( p_event );
+	}
+
+	UINT nWidth = newSize.width();
+	UINT nHeight = newSize.height();
+
+	HRESULT hr = S_OK;
+
+	if(!pDevice_) 
+		return;
+
+	viewPort_.Height = nHeight;
+	viewPort_.Width = nWidth;
+	viewPort_.MaxZ = nHeight;
+	viewPort_.MinZ = nHeight;
+	viewPort_.X = 0.f;
+	viewPort_.Y = 0.f;
+
+	d3dParam_.BackBufferWidth = newSize.width();
+	d3dParam_.BackBufferHeight = newSize.height();
+
+	InvalidateDeviceObjects();
+
+	hr = pDevice_->Reset(&d3dParam_);
+
+	RestoreDeviceObjects();
+
 }
