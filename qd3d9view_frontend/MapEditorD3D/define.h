@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <d3d9types.h>
 
 #define SAFE_DELETE(p)       { if (p) { delete (p);     (p)=NULL; } }
 #define SAFE_DELETE_ARRAY(p) { if (p) { delete[] (p);   (p)=NULL; } }
@@ -31,5 +32,6 @@ void SafeDeletaVector(T& con)
 	}
 	con.clear();
 }
+
 
 #endif /*__DEFINE_H__*/
