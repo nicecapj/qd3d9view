@@ -2,7 +2,7 @@
 	created:	2012/02/04
 	created:	2012:4:2   15:45
 	filename: 	QD3D9View.h		
-	author:		DRAGONKING(nicecapj@naver.com)
+	author:		DRAGONKING(gmail.com)
 	
 	purpose:	directx 9.0 control for QT
 *******************************************************************************/

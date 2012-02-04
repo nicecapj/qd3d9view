@@ -1,3 +1,11 @@
+/********************************************************************
+	created:	2012/02/05
+	created:	2012:5:2   0:47
+	filename: 	QD3D9View_MsgHandler.cpp		
+	author:		DRAGONKING(nicecapj@gmail.com)
+	
+	purpose:	process windows message
+*********************************************************************/
 #include "QD3D9View.h"
 
 bool QD3DWiew::winEvent(MSG *message, long *result)
