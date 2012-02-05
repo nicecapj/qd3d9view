@@ -11,25 +11,25 @@ purpose:	define for test
 
 struct CUSTOMVERTEX
 {
-	FLOAT x, y, z;      // The untransformed, 3D position for the vertex
-	FLOAT rhw;
-	DWORD color;        // The vertex color
-	CUSTOMVERTEX()
-	{
-		x = 0;
-		y = 0;
-		z = 0;
-		color = 0xffff00;
-	}
+	FLOAT x, y, z, rhw;      // The untransformed, 3D position for the vertex
+	DWORD color;			  // The vertex color
+	//CUSTOMVERTEX()
+	//{
+	//	x = 0.f;
+	//	y = 0.f;
+	//	z = 0.f;
+	//	rhw = 1.f;
+	//	color = 0xffff00;
+	//}
 
-	CUSTOMVERTEX(float fx, float fy, float fz, float frhw, DWORD c)
-	{
-		x = fx;
-		y = fy;
-		z = fz;
-		rhw =  frhw;
-		color = c;
-	}
+	//CUSTOMVERTEX(float fx, float fy, float fz, float frhw, DWORD c)
+	//{
+	//	x = fx;
+	//	y = fy;
+	//	z = fz;
+	//	rhw =  frhw;
+	//	color = c;
+	//}
 };
 
 #define  D3DFVF_P3RHWF_D (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
