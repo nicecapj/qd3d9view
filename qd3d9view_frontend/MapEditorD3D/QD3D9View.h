@@ -112,7 +112,7 @@ private:
 
 	
 	void InitializeFont();
-	void DrawStatusText(const std::string& str);
+	void DrawFps();
 
 	//test
 	void	SetupGeometryForTest();
@@ -146,7 +146,10 @@ private:
 	//for tool
 	bool isWireMode_;		
 	QTimer timer_;
-	float fps_;
+	
+	int fps_;
+	float addTime_;
+	int   callCnt;
 };
 
 #endif  __QT_DIRECTX_WIEW_H__

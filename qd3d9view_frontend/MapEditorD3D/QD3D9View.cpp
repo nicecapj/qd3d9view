@@ -29,6 +29,9 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 	timer_.setInterval(10);	//최대 해상도로 1/1000
 	timer_.setSingleShot( false ) ;		//정해진 시간후에 한번 호출하는 방식은 사용하지 않는다.
 	QObject::connect( &timer_, SIGNAL( timeout() ), this, SLOT( Idle() ) ) ;
+
+	addTime_ = 0;
+	callCnt = 0;
 }
 
 QD3DWiew::~QD3DWiew()
@@ -41,7 +44,7 @@ void QD3DWiew::PreRender()
 }
 
 void QD3DWiew::Render()
-{	
+{		
 	HRESULT hr = S_OK;
 
 	ClearScene( D3DXCOLOR( 0.0f, 0.f, 0.f, 0.f ), 1.0f, 0 );
@@ -55,7 +58,7 @@ void QD3DWiew::Render()
 				
 		SetupGeometryForTest();
 		//RenderGeometryForTest();
-		DrawStatusText("TEST");
+		DrawFps();
 
 		EndScene();				
 	}
@@ -369,6 +372,21 @@ void QD3DWiew::Idle()
 	PreRender();
 	Render();
 	PostRender();
+
+
+	if(addTime_ >= 1.0f)
+	{
+		++callCnt;
+		fps_ = callCnt;
+		callCnt = 0;	
+		addTime_ = 0;
+
+	}
+	else
+	{
+		addTime_ += timer_.interval() * 0.001;
+		++callCnt;
+	}
 }
 
 void QD3DWiew::InitializeFont()
@@ -377,8 +395,10 @@ void QD3DWiew::InitializeFont()
 	D3DXCreateFont(pDevice_, 20, 10, 1, TRUE, 1, 1, 5, 1,  NULL,L"Courier", &pFont_);	
 }
 
-void QD3DWiew::DrawStatusText(const std::string& str)
+void QD3DWiew::DrawFps()
 {
-	RECT TextRect = {10.f, 10.f, 100.f, 100.f};
-	pFont_->DrawTextA(NULL, str.c_str(), -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
+	RECT TextRect = {0.f, 0.f, 150.f, 100.f};
+	char buff[16];
+	sprintf(buff, "FPS : %d", fps_);
+	pFont_->DrawTextA(NULL, buff, -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
 }
