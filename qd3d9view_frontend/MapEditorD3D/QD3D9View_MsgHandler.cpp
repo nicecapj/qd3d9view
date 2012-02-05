@@ -18,14 +18,6 @@ bool QD3DWiew::winEvent(MSG *message, long *result)
 
 	switch(message->message)
 	{
-	case WM_ACTIVATEAPP:
-		{
-			//Update(0);
-			//PreRender();
-			//Render();
-			//PostRender();
-		}
-		break;
 	case WM_PAINT:
 		{			
 		}
