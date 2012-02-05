@@ -26,7 +26,7 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 	setAttribute(Qt::WA_OpaquePaintEvent);
 
 	timer_.setParent( parent );
-	timer_.setInterval(10);	//최대 해상도로 1/1000
+	timer_.setInterval(1);	//최대 해상도로 1/1000
 	timer_.setSingleShot( false ) ;		//정해진 시간후에 한번 호출하는 방식은 사용하지 않는다.
 	QObject::connect( &timer_, SIGNAL( timeout() ), this, SLOT( Idle() ) ) ;
 
