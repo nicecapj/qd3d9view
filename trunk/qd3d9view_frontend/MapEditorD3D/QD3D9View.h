@@ -28,14 +28,17 @@
 //------------------------------------------------------------------------------
 class QD3DWiew : public QWidget
 {
-public:	
+	Q_OBJECT
+
+public:		
+
 	QD3DWiew(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~QD3DWiew();
 
 	HRESULT Initialize();
 	void	Finalize();
 
-	void Update();
+	void Update(float timeMS);
 
 	void PreRender();
 	void Render();
@@ -45,7 +48,7 @@ public:
 	const IDirect3DDevice9* GetD3DDevice() { return pDevice_; }	
 
 public slots:
-		void idle();
+		void Idle();
 
 protected:
 	// Event handlers

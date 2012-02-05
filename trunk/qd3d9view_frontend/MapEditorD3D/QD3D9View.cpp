@@ -26,7 +26,7 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 	setAttribute(Qt::WA_OpaquePaintEvent);
 
 	timer_.setParent( parent );
-	timer_.setInterval(0);	//최대 해상도로 1/1000
+	timer_.setInterval(10);	//최대 해상도로 1/1000
 	timer_.setSingleShot( false ) ;		//정해진 시간후에 한번 호출하는 방식은 사용하지 않는다.
 	QObject::connect( &timer_, SIGNAL( timeout() ), this, SLOT( Idle() ) ) ;
 }
@@ -54,13 +54,18 @@ void QD3DWiew::Render()
 			pDevice_->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 				
 		SetupGeometryForTest();
-		RenderGeometryForTest();
-		DrawFPS();
+		//RenderGeometryForTest();
+		//DrawFPS();
 
-		EndScene();
+		EndScene();				
+	}
+	else
+	{
+		qDebug("BeginScene : %d", hr);		
 	}
 
 	hr = Present();
+	
 }
 
 void QD3DWiew::PostRender()
@@ -72,6 +77,8 @@ HRESULT	QD3DWiew::BeginScene()
 	if(!pDevice_)
 		return E_FAIL;
 	
+	qDebug("BeginScene");
+
 	return pDevice_->BeginScene();
 }
 
@@ -79,6 +86,8 @@ HRESULT	QD3DWiew::EndScene()
 {
 	if(!pDevice_)
 		return E_FAIL;
+	
+	qDebug("EndScene");
 
 	return pDevice_->EndScene();
 }
@@ -89,6 +98,9 @@ HRESULT	QD3DWiew::Present()
 		return E_FAIL;
 
 	HRESULT hr =  pDevice_->Present(0,0,0,0);
+	
+	qDebug("Present");
+
 	if(hr == D3DERR_DEVICELOST)
 	{
 		Sleep(100);
@@ -182,7 +194,9 @@ HRESULT QD3DWiew::Initialize()
 			d3dParam_.Windowed,
 			(D3DMULTISAMPLE_TYPE)m,
 			&QualityBackBuffer );
-		if( FAILED(hr) ) break;
+
+		if( FAILED(hr) ) 
+			break;
 
 		if( QualityBackBuffer>0 )
 		{
@@ -224,7 +238,7 @@ HRESULT QD3DWiew::Initialize()
 
 	timer_.start();
 
-	InitializeFont();
+	InitializeFont();	
 	InitGeometryForTest();
 
 	return S_OK;
@@ -248,6 +262,12 @@ HRESULT	QD3DWiew::RestoreDeviceObjects()
 {
 	if(!pDevice_)
 		return E_FAIL;
+
+	//InitGeometryForTest();
+
+	//pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE );
+	//pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+	//pDevice_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
 
 	return S_OK;
 }
@@ -278,7 +298,7 @@ void QD3DWiew::ClearDepthStencil(float Z, DWORD Stencil)
 
 }
 
-void QD3DWiew::Update()
+void QD3DWiew::Update(float timeMS)
 {
 
 }
@@ -304,15 +324,22 @@ void QD3DWiew::SetupGeometryForTest()
 }
 
 HRESULT QD3DWiew::InitGeometryForTest()
-{
+{		
+	//CUSTOMVERTEX vertices[] = 
+	//{
+	//	CUSTOMVERTEX(150.f,50.f,0.5f,1.0f, 0xffff0000),
+	//	CUSTOMVERTEX(250.f,250.f,0.5f,1.0f, 0xff00ff00),
+	//	CUSTOMVERTEX(50.f,250.f,0.5f,1.0f, 0xff0000ff),
+	//};
+
 	CUSTOMVERTEX vertices[] = 
 	{
-		CUSTOMVERTEX(150.f,50.f,0.5f,1.0f, 0xffff0000),
-		CUSTOMVERTEX(250.f,250.f,0.5f,1.0f, 0xffff0000),
-		CUSTOMVERTEX(50.f,250.f,0.5f,1.0f, 0xffff0000),
+		{150.f,50.f,0.5f,1.0f, 0xffff0000,},
+		{250.f,250.f,0.5f,1.0f, 0xff00ff00,},
+		{50.f,250.f,0.5f,1.0f, 0xff0000ff,},
 	};
-		    
-	if(FAILED(pDevice_->CreateVertexBuffer(3 * sizeof(vertices), 0, D3DFVF_P3RHWF_D, D3DPOOL_DEFAULT, &pVB_, NULL)))
+
+	if(FAILED(pDevice_->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX), 0, D3DFVF_P3RHWF_D, D3DPOOL_DEFAULT, &pVB_, NULL)))
 	{
 		return E_FAIL;
 	}
@@ -326,22 +353,23 @@ HRESULT QD3DWiew::InitGeometryForTest()
 	pVB_->Unlock();
 
 	objectFontPos_ = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	SetupGeometryForTest();
 
 	return S_OK;
 }
 
 void QD3DWiew::RenderGeometryForTest()
 {
-	pDevice_->SetStreamSource(0, pVB_, 0, sizeof(CUSTOMVERTEX));
-	pDevice_->SetFVF(D3DFVF_P3RHWF_D);
-	pDevice_->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+	//pDevice_->SetStreamSource(0, pVB_, 0, sizeof(CUSTOMVERTEX));
+	//pDevice_->SetFVF(D3DFVF_P3RHWF_D);
+	//pDevice_->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
 }
 
-void QD3DWiew::idle()
+void QD3DWiew::Idle()
 {
 	appTime_ += timer_.interval() * 0.001;
 
-	Update();
+	Update(appTime_); 
 	PreRender();
 	Render();
 	PostRender();
@@ -355,6 +383,6 @@ void QD3DWiew::InitializeFont()
 
 void QD3DWiew::DrawFPS()
 {
-	RECT TextRect = {screenFontPos_.x-50, screenFontPos_.y-25,screenFontPos_.x+50, screenFontPos_.y+25};
-	pFont_->DrawTextA(NULL, "TEST", -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
+	RECT TextRect = {screenFontPos_.x-200, screenFontPos_.y-25,screenFontPos_.x+50, screenFontPos_.y+25};
+	pFont_->DrawText(NULL, L"TEST", -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
 }

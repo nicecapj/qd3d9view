@@ -83,7 +83,7 @@ void QD3DWiew::paintEvent(QPaintEvent *paintE)
 {
 	Q_UNUSED(paintE);
 	
-	Update();
+	//Update();
 	PreRender();
 	Render();
 	PostRender();
