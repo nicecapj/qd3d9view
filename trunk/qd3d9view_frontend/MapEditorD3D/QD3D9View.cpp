@@ -15,7 +15,7 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 :QWidget( parent, flags )
 ,pD3D_(0), pDevice_(0)
 ,pVB_(0), pIB_(0), pVertexShader_(0), pConstantTable_(0), pVertexDeclaration_(0)
-,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0)
+,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0), fps_(0)
 {	
 	//버퍼에서 버퍼로 복사후 프레임버퍼로 복사하게 되는데, 버퍼에서 바로 프레임버퍼로 복사하게 한다.
 	//성능향상이 있지만 깜빡임이 나타날 수 있다.
@@ -55,7 +55,7 @@ void QD3DWiew::Render()
 				
 		SetupGeometryForTest();
 		//RenderGeometryForTest();
-		//DrawFPS();
+		DrawStatusText("TEST");
 
 		EndScene();				
 	}
@@ -183,6 +183,11 @@ HRESULT QD3DWiew::Initialize()
 	d3dParam_.MultiSampleQuality = 0;
 	d3dParam_.EnableAutoDepthStencil = TRUE;
 	d3dParam_.AutoDepthStencilFormat = D3DFMT_D24S8; 
+	
+	QSize wndSize = size();
+	d3dParam_.BackBufferWidth =	wndSize.width();
+	d3dParam_.BackBufferHeight = wndSize.height();
+
 
 	for( int m=0; m<=(int)D3DMULTISAMPLE_4_SAMPLES; m+=2 )
 	{
@@ -239,7 +244,7 @@ HRESULT QD3DWiew::Initialize()
 	timer_.start();
 
 	InitializeFont();	
-	InitGeometryForTest();
+//	InitGeometryForTest();
 
 	return S_OK;
 }
@@ -261,13 +266,11 @@ void QD3DWiew::Finalize()
 HRESULT	QD3DWiew::RestoreDeviceObjects()
 {
 	if(!pDevice_)
-		return E_FAIL;
+		return E_FAIL;	
 
-	//InitGeometryForTest();
-
-	//pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE );
-	//pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
-	//pDevice_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
+	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE );
+	pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+	pDevice_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
 
 	return S_OK;
 }
@@ -300,7 +303,7 @@ void QD3DWiew::ClearDepthStencil(float Z, DWORD Stencil)
 
 void QD3DWiew::Update(float timeMS)
 {
-
+		
 }
 
 void QD3DWiew::SetupGeometryForTest()
@@ -325,21 +328,14 @@ void QD3DWiew::SetupGeometryForTest()
 
 HRESULT QD3DWiew::InitGeometryForTest()
 {		
-	//CUSTOMVERTEX vertices[] = 
-	//{
-	//	CUSTOMVERTEX(150.f,50.f,0.5f,1.0f, 0xffff0000),
-	//	CUSTOMVERTEX(250.f,250.f,0.5f,1.0f, 0xff00ff00),
-	//	CUSTOMVERTEX(50.f,250.f,0.5f,1.0f, 0xff0000ff),
-	//};
-
 	CUSTOMVERTEX vertices[] = 
 	{
-		{150.f,50.f,0.5f,1.0f, 0xffff0000,},
-		{250.f,250.f,0.5f,1.0f, 0xff00ff00,},
-		{50.f,250.f,0.5f,1.0f, 0xff0000ff,},
+		CUSTOMVERTEX(150.f,50.f,0.5f,0xffff0000),
+		CUSTOMVERTEX(250.f,250.f,0.5f, 0xff00ff00),
+		CUSTOMVERTEX(50.f,250.f,0.5f, 0xff0000ff),
 	};
 
-	if(FAILED(pDevice_->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX), 0, D3DFVF_P3RHWF_D, D3DPOOL_DEFAULT, &pVB_, NULL)))
+	if(FAILED(pDevice_->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX), 0, D3DFVF_P3F_D, D3DPOOL_DEFAULT, &pVB_, NULL)))
 	{
 		return E_FAIL;
 	}
@@ -360,9 +356,9 @@ HRESULT QD3DWiew::InitGeometryForTest()
 
 void QD3DWiew::RenderGeometryForTest()
 {
-	//pDevice_->SetStreamSource(0, pVB_, 0, sizeof(CUSTOMVERTEX));
-	//pDevice_->SetFVF(D3DFVF_P3RHWF_D);
-	//pDevice_->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+	pDevice_->SetStreamSource(0, pVB_, 0, sizeof(CUSTOMVERTEX));
+	pDevice_->SetFVF(D3DFVF_P3F_D);
+	pDevice_->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 1);
 }
 
 void QD3DWiew::Idle()
@@ -381,8 +377,8 @@ void QD3DWiew::InitializeFont()
 	D3DXCreateFont(pDevice_, 20, 10, 1, TRUE, 1, 1, 5, 1,  NULL,L"Courier", &pFont_);	
 }
 
-void QD3DWiew::DrawFPS()
+void QD3DWiew::DrawStatusText(const std::string& str)
 {
-	RECT TextRect = {screenFontPos_.x-200, screenFontPos_.y-25,screenFontPos_.x+50, screenFontPos_.y+25};
-	pFont_->DrawText(NULL, L"TEST", -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
+	RECT TextRect = {10.f, 10.f, 100.f, 100.f};
+	pFont_->DrawTextA(NULL, str.c_str(), -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
 }
