@@ -406,6 +406,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\ClassDiagram1.cd"
+			>
+		</File>
+		<File
 			RelativePath=".\MapEditorD3D.rc"
 			>
 		</File>
