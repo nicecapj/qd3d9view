@@ -405,6 +405,10 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="DXUT"
+			>
+		</Filter>
 		<File
 			RelativePath=".\ClassDiagram1.cd"
 			>

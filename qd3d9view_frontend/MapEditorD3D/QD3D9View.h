@@ -16,16 +16,11 @@
 #include <d3dx9.h>
 #include <QTimer.h>
 
-#pragma comment(lib,"d3d9.lib")
-#if (defined(_DEBUG) || defined(DEBUG))
-	#pragma comment(lib,"d3dx9d.lib")
-#else
-	#pragma comment(lib,"d3dx9.lib")
-#endif
-
 #include <DxErr.h>
 #pragma comment(lib,"DxErr.lib")
 //------------------------------------------------------------------------------
+class CBaseCamera;
+class CModelViewerCamera;
 class QD3DWiew : public QWidget
 {
 	Q_OBJECT
@@ -116,6 +111,11 @@ private:
 
 	void InitializeValue();
 
+	CBaseCamera* pModelviewCam_;
+	void InitializeCamera();
+	CModelViewerCamera* GetModelViewCamera();
+	void SetupCamera();
+
 	//test
 	void	SetupGeometryForTest();
 	HRESULT InitGeometryForTest();
@@ -158,6 +158,8 @@ private:
 	QPoint startMousePos_;
 	D3DXVECTOR3 eyePos_;	
 	D3DXMATRIXA16 matWorld;
+
+	QSize windowSize_;
 };
 
 #endif  __QT_DIRECTX_WIEW_H__
