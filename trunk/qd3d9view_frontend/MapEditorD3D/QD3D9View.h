@@ -117,6 +117,7 @@ private:
 	//test
 	void	SetupGeometryForTest();
 	HRESULT InitGeometryForTest();
+	void    FinalzeGeometryForTest();
 	void	RenderGeometryForTest();
 
 
@@ -147,7 +148,7 @@ private:
 	bool isWireMode_;		
 	QTimer timer_;
 	
-	int fps_;
+	float fps_;
 	float addTime_;
 	int   callCnt;
 };

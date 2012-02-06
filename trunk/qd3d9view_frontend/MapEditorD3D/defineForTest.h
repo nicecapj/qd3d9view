@@ -12,22 +12,13 @@ purpose:	define for test
 struct CUSTOMVERTEX
 {
 	FLOAT x, y, z;      // The untransformed, 3D position for the vertex
-	DWORD color;			  // The vertex color
-	//CUSTOMVERTEX()
-	//{
-	//	x = 0.f;
-	//	y = 0.f;
-	//	z = 0.f;
-	//	rhw = 1.f;
-	//	color = 0xffff00;
-	//}
+	DWORD color;			  // The vertex color	
 
 	CUSTOMVERTEX(float fx, float fy, float fz, DWORD c)
 	{
 		x = fx;
 		y = fy;
-		z = fz;
-	//	rhw =  frhw;
+		z = fz;	
 		color = c;
 	}
 };

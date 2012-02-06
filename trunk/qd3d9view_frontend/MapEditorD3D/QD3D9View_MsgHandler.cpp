@@ -81,6 +81,7 @@ void QD3DWiew::paintEvent(QPaintEvent *paintE)
 	PostRender();
 }
 
+//리사이즈하게 되면, 디바이스등등 소실된다.
 void QD3DWiew::resizeEvent(QResizeEvent *p_event)
 {
 	QSize newSize = size();

@@ -15,7 +15,7 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 :QWidget( parent, flags )
 ,pD3D_(0), pDevice_(0)
 ,pVB_(0), pIB_(0), pVertexShader_(0), pConstantTable_(0), pVertexDeclaration_(0)
-,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0), fps_(0)
+,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0), fps_(0.f)
 {	
 	//버퍼에서 버퍼로 복사후 프레임버퍼로 복사하게 되는데, 버퍼에서 바로 프레임버퍼로 복사하게 한다.
 	//성능향상이 있지만 깜빡임이 나타날 수 있다.
@@ -57,18 +57,17 @@ void QD3DWiew::Render()
 			pDevice_->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 				
 		SetupGeometryForTest();
-		//RenderGeometryForTest();
+		RenderGeometryForTest();
 		DrawFps();
 
-		EndScene();				
+		EndScene();						
 	}
 	else
 	{
-		qDebug("BeginScene : %d", hr);		
-	}
+		qDebug("Failed BeginScene : %d", hr);		
+	}		
 
 	hr = Present();
-	
 }
 
 void QD3DWiew::PostRender()
@@ -78,9 +77,7 @@ void QD3DWiew::PostRender()
 HRESULT	QD3DWiew::BeginScene()
 {
 	if(!pDevice_)
-		return E_FAIL;
-	
-	qDebug("BeginScene");
+		return E_FAIL;	
 
 	return pDevice_->BeginScene();
 }
@@ -90,8 +87,6 @@ HRESULT	QD3DWiew::EndScene()
 	if(!pDevice_)
 		return E_FAIL;
 	
-	qDebug("EndScene");
-
 	return pDevice_->EndScene();
 }
 
@@ -101,8 +96,6 @@ HRESULT	QD3DWiew::Present()
 		return E_FAIL;
 
 	HRESULT hr =  pDevice_->Present(0,0,0,0);
-	
-	qDebug("Present");
 
 	if(hr == D3DERR_DEVICELOST)
 	{
@@ -246,42 +239,47 @@ HRESULT QD3DWiew::Initialize()
 
 	timer_.start();
 
-	InitializeFont();	
-//	InitGeometryForTest();
-
 	return S_OK;
 }
 
 void QD3DWiew::Finalize()
-{
-	InvalidateDeviceObjects();
-
-	SAFE_RELEASE(pFont_);
-
-	SAFE_RELEASE(pVB_);
-	SAFE_RELEASE(pIB_);
+{	
+	InvalidateDeviceObjects();		
+	
 	SAFE_RELEASE(pDevice_);
-	SAFE_RELEASE(pD3D_);	
-
-	timer_.stop();
+	SAFE_RELEASE(pD3D_);
 }
 
+//복구 처리
 HRESULT	QD3DWiew::RestoreDeviceObjects()
 {
 	if(!pDevice_)
 		return E_FAIL;	
 
+	InitializeFont();
+	InitGeometryForTest();
+
 	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE );
 	pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
-	pDevice_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
+	//pDevice_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
+
+	timer_.start();
 
 	return S_OK;
 }
 
+//무효화 처리
 HRESULT QD3DWiew::InvalidateDeviceObjects()
 {
 	if(!pDevice_)
 		return E_FAIL;
+
+	timer_.stop();
+
+	SAFE_RELEASE(pFont_);
+
+	SAFE_RELEASE(pVB_);
+	SAFE_RELEASE(pIB_);	
 
 	return S_OK;
 }
@@ -312,7 +310,7 @@ void QD3DWiew::Update(float timeMS)
 void QD3DWiew::SetupGeometryForTest()
 {
 	D3DXMATRIXA16 matWorld;
-	D3DXMatrixRotationX( &matWorld, 1 );
+	//D3DXMatrixRotationX( &matWorld, 1 );
 
 	D3DXVECTOR3 vEyePt( 0.0f, 3.0f,-80.0f );
 	D3DXVECTOR3 vLookatPt( 0.0f, 0.0f, 80.0f );
@@ -333,9 +331,9 @@ HRESULT QD3DWiew::InitGeometryForTest()
 {		
 	CUSTOMVERTEX vertices[] = 
 	{
-		CUSTOMVERTEX(150.f,50.f,0.5f,0xffff0000),
-		CUSTOMVERTEX(250.f,250.f,0.5f, 0xff00ff00),
-		CUSTOMVERTEX(50.f,250.f,0.5f, 0xff0000ff),
+		CUSTOMVERTEX(-1.f , 0.f , 0.f , 0xffff0000),
+		CUSTOMVERTEX(0.f , 1.f , 0.f , 0xff00ff00),
+		CUSTOMVERTEX(1.f , 0.f , 0.f , 0xff0000ff),
 	};
 
 	if(FAILED(pDevice_->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX), 0, D3DFVF_P3F_D, D3DPOOL_DEFAULT, &pVB_, NULL)))
@@ -357,6 +355,7 @@ HRESULT QD3DWiew::InitGeometryForTest()
 	return S_OK;
 }
 
+
 void QD3DWiew::RenderGeometryForTest()
 {
 	pDevice_->SetStreamSource(0, pVB_, 0, sizeof(CUSTOMVERTEX));
@@ -366,7 +365,7 @@ void QD3DWiew::RenderGeometryForTest()
 
 void QD3DWiew::Idle()
 {
-	appTime_ += timer_.interval() * 0.001;
+	appTime_ += timer_.interval() * 0.01;
 
 	Update(appTime_); 
 	PreRender();
@@ -377,14 +376,14 @@ void QD3DWiew::Idle()
 	if(addTime_ >= 1.0f)
 	{
 		++callCnt;
-		fps_ = callCnt;
+		fps_ = callCnt/addTime_;
 		callCnt = 0;	
 		addTime_ = 0;
 
 	}
 	else
 	{
-		addTime_ += timer_.interval() * 0.001;
+		addTime_ += timer_.interval() * 0.01;
 		++callCnt;
 	}
 }
@@ -397,8 +396,10 @@ void QD3DWiew::InitializeFont()
 
 void QD3DWiew::DrawFps()
 {
-	RECT TextRect = {0.f, 0.f, 150.f, 100.f};
+	RECT TextRect = {0.f, 0.f, 200.f, 100.f};
 	char buff[16];
-	sprintf(buff, "FPS : %d", fps_);
-	pFont_->DrawTextA(NULL, buff, -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
+	sprintf(buff, "FPS : %5.2f", fps_);
+	
+	if(pFont_)
+		pFont_->DrawTextA(NULL, buff, -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
 }
