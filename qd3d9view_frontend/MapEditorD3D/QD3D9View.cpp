@@ -30,8 +30,7 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 	timer_.setSingleShot( false ) ;		//정해진 시간후에 한번 호출하는 방식은 사용하지 않는다.
 	QObject::connect( &timer_, SIGNAL( timeout() ), this, SLOT( Idle() ) ) ;
 
-	addTime_ = 0;
-	callCnt = 0;
+	InitializeValue();
 }
 
 QD3DWiew::~QD3DWiew()
@@ -254,10 +253,11 @@ void QD3DWiew::Finalize()
 HRESULT	QD3DWiew::RestoreDeviceObjects()
 {
 	if(!pDevice_)
-		return E_FAIL;	
+		return E_FAIL;		
 
+	InitializeValue();
 	InitializeFont();
-	InitGeometryForTest();
+	InitGeometryForTest();	
 
 	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE );
 	pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
@@ -309,21 +309,21 @@ void QD3DWiew::Update(float timeMS)
 
 void QD3DWiew::SetupGeometryForTest()
 {
-	D3DXMATRIXA16 matWorld;
-	//D3DXMatrixRotationX( &matWorld, 1 );
+	//D3DXMATRIXA16 matWorld;	
+	pDevice_->SetTransform(D3DTS_WORLD, &matWorld);
 
-	D3DXVECTOR3 vEyePt( 0.0f, 3.0f,-80.0f );
+	//D3DXVECTOR3 vEyePt( 0.0f, 3.0f,-80.0f );
 	D3DXVECTOR3 vLookatPt( 0.0f, 0.0f, 80.0f );
 	D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
 	D3DXMATRIXA16 matView;
-	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
-	pDevice_->SetTransform( D3DTS_VIEW, &matView );
+	D3DXMatrixLookAtLH( &matView, &eyePos_, &vLookatPt, &vUpVec );
+	pDevice_->SetTransform( D3DTS_VIEW, &matView );	
 	
 	D3DXMATRIXA16 matProj;
 	D3DXMatrixPerspectiveFovLH( &matProj, D3DX_PI / 4, 1.0f, 1.0f, 1000.0f );
 	pDevice_->SetTransform( D3DTS_PROJECTION, &matProj );
 
-	//스크린 공간으로 투영
+	//스크린 공간으로 투영(글짜 출력용)
 	D3DXVec3Project(&screenFontPos_,&objectFontPos_,&viewPort_,&matProj,&matView,&matWorld);
 }
 
@@ -402,4 +402,15 @@ void QD3DWiew::DrawFps()
 	
 	if(pFont_)
 		pFont_->DrawTextA(NULL, buff, -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
+}
+
+void QD3DWiew::InitializeValue()
+{
+	addTime_ = 0;
+	callCnt = 0;
+
+	eyePos_ = D3DXVECTOR3(0, 0.f, -80.f);
+	D3DXMatrixIdentity(&matWorld);	 
+	
+	startMousePos_ = QPoint(0,0);
 }

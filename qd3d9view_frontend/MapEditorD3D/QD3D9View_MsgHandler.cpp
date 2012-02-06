@@ -41,32 +41,75 @@ bool QD3DWiew::winEvent(MSG *message, long *result)
 
 }
 
-void QD3DWiew::mousePressEvent(QMouseEvent *)
+void QD3DWiew::mousePressEvent(QMouseEvent * event)
+{
+	if(event->button() & Qt::RightButton)
+	{		
+		startMousePos_.setX(event->x());
+		startMousePos_.setY(event->y());
+	}
+}
+
+void QD3DWiew::mouseReleaseEvent(QMouseEvent * event)
 {
 
 }
 
-void QD3DWiew::mouseReleaseEvent(QMouseEvent *)
+void QD3DWiew::mouseDoubleClickEvent(QMouseEvent * event)
 {
 
 }
 
-void QD3DWiew::mouseDoubleClickEvent(QMouseEvent *)
-{
+void QD3DWiew::mouseMoveEvent(QMouseEvent * event)
+{	
+	//if(event->button() & Qt::RightButton)	//moveevnet에서는 button값이 비정상임
+	
+	if(event->buttons() == Qt::RightButton)
+	{		
+		QPoint endPT(event->x(), event->y());
+		QPoint moveFactor(endPT.x() - startMousePos_.x(), endPT.y() - startMousePos_.y());
 
+		D3DXMATRIXA16 matRotX;
+		D3DXMATRIXA16 matRotY;
+
+		//if(moveFactor.x() > 0)						
+		//{
+		//	D3DXMatrixRotationX(&matRotX, 10.f);
+		//	matWorld *= matRotX;
+		//}
+		//else
+		//{
+		//	D3DXMatrixRotationX(&matRotX, -10.f);
+		//	matWorld *= matRotX;
+		//}
+
+		if(moveFactor.y() > 0)
+		{
+			D3DXMatrixRotationY(&matRotY, 10.f);
+			matWorld *= matRotY;
+		}
+		else
+		{
+			D3DXMatrixRotationY(&matRotY, -10.f);
+			matWorld *= matRotY;
+		}
+	}	
 }
 
-void QD3DWiew::mouseMoveEvent(QMouseEvent *)
+void QD3DWiew::wheelEvent(QWheelEvent * event)
 {
-
+	float delte = event->delta();
+	if(delte > 0.f)
+	{
+		eyePos_.z += 10.f;
+	}
+	else
+	{
+		eyePos_.z -= 10.f;
+	}
 }
 
-void QD3DWiew::wheelEvent(QWheelEvent *)
-{
-
-}
-
-void QD3DWiew::closeEvent(QCloseEvent *)
+void QD3DWiew::closeEvent(QCloseEvent * event)
 {
 
 }

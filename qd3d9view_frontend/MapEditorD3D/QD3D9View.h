@@ -114,6 +114,8 @@ private:
 	void InitializeFont();
 	void DrawFps();
 
+	void InitializeValue();
+
 	//test
 	void	SetupGeometryForTest();
 	HRESULT InitGeometryForTest();
@@ -150,7 +152,12 @@ private:
 	
 	float fps_;
 	float addTime_;
-	int   callCnt;
+	int   callCnt;	
+	
+
+	QPoint startMousePos_;
+	D3DXVECTOR3 eyePos_;	
+	D3DXMATRIXA16 matWorld;
 };
 
 #endif  __QT_DIRECTX_WIEW_H__
