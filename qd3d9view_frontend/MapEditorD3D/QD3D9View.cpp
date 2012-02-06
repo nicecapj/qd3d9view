@@ -264,8 +264,9 @@ void QD3DWiew::Finalize()
 {	
 	InvalidateDeviceObjects();		
 	
+	SAFE_DELETE(pModelviewCam_);
 	SAFE_RELEASE(pDevice_);
-	SAFE_RELEASE(pD3D_);
+	SAFE_RELEASE(pD3D_);	
 }
 
 //복구 처리
