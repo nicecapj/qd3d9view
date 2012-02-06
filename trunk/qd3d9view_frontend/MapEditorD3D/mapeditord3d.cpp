@@ -25,6 +25,11 @@ MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 
 			SAFE_DELETE(pD3DWidget_);
 		}
+		else
+		{
+			QObject::connect(ui.actionWire, SIGNAL(triggered()), this, SLOT(SetRenderModeWire()));    
+			QObject::connect(ui.actionSolid, SIGNAL(triggered()), this, SLOT(SetRenderModeSolid()));    
+		}
 
 		//pD3DWidget_->show();
 	}
@@ -33,4 +38,17 @@ MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 MapEditorD3D::~MapEditorD3D()
 {
 	delete pD3DWidget_;
+}
+
+
+void MapEditorD3D::SetRenderModeWire()
+{
+	if(pD3DWidget_)
+		pD3DWidget_->SetRenderMode(QD3DWiew::rdWire);
+}
+
+void MapEditorD3D::SetRenderModeSolid()
+{
+	if(pD3DWidget_)
+		pD3DWidget_->SetRenderMode(QD3DWiew::rdSolid);
 }

@@ -418,3 +418,11 @@ void QD3DWiew::SetupCamera()
 		pDevice_->SetTransform( D3DTS_PROJECTION, GetModelViewCamera()->GetProjMatrix());
 	}
 }
+
+void QD3DWiew::SetRenderMode(renderMode mode)
+{
+	if(mode == rdSolid)
+		isWireMode_ = false;
+	else
+		isWireMode_ = true;
+}

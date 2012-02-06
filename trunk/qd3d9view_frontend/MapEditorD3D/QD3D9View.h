@@ -42,6 +42,15 @@ public:
 	const IDirect3D9*	GetD3D() { return pD3D_; }
 	const IDirect3DDevice9* GetD3DDevice() { return pDevice_; }	
 
+	//tool
+	enum renderMode
+	{
+		rdWire,
+		rdSolid,
+		rdCount,
+	};
+	void SetRenderMode(renderMode mode);
+
 public slots:
 		void Idle();
 

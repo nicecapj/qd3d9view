@@ -12,6 +12,10 @@ class MapEditorD3D : public QMainWindow
 public:
 	MapEditorD3D(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~MapEditorD3D();
+	
+public slots:
+	void SetRenderModeWire();
+	void SetRenderModeSolid();
 
 private:
 	Ui::MapEditorD3DClass ui;
