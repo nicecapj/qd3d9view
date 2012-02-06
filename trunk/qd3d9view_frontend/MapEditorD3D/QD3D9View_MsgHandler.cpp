@@ -9,6 +9,10 @@
 #include "QD3D9View.h"
 #include <qevent.h>
 
+#define DXUT_AUTOLIB
+#include "DXUT.h"
+#include "DXUTcamera.h"
+
 bool QD3DWiew::winEvent(MSG *message, long *result)
 {
 	if(SUCCEEDED(DefWindowProc(message->hwnd, message->message, message->wParam, message->lParam)))
@@ -16,26 +20,8 @@ bool QD3DWiew::winEvent(MSG *message, long *result)
 	else 
 		*result = 0;
 
-	switch(message->message)
-	{
-	case WM_PAINT:
-		{			
-		}
-		break;
-	case WM_SHOWWINDOW:
-		{
-		}
-		break;
-
-	case WM_CLOSE:
-		{
-		}
-		break;
-	default:
-		{
-			return false;
-		}
-	}
+	if(pModelviewCam_)
+		pModelviewCam_->HandleMessages(message->hwnd, message->message, message->wParam, message->lParam);
 
 	return true;
 
@@ -43,11 +29,11 @@ bool QD3DWiew::winEvent(MSG *message, long *result)
 
 void QD3DWiew::mousePressEvent(QMouseEvent * event)
 {
-	if(event->button() & Qt::RightButton)
-	{		
-		startMousePos_.setX(event->x());
-		startMousePos_.setY(event->y());
-	}
+	//if(event->button() & Qt::RightButton)
+	//{		
+	//	startMousePos_.setX(event->x());
+	//	startMousePos_.setY(event->y());
+	//}
 }
 
 void QD3DWiew::mouseReleaseEvent(QMouseEvent * event)
@@ -61,43 +47,43 @@ void QD3DWiew::mouseDoubleClickEvent(QMouseEvent * event)
 }
 
 void QD3DWiew::mouseMoveEvent(QMouseEvent * event)
-{	
-	//if(event->button() & Qt::RightButton)	//moveevnet에서는 button값이 비정상임
-	
-	if(event->buttons() == Qt::RightButton)
-	{		
-		QPoint endPT(event->x(), event->y());
-		QPoint moveFactor(endPT.x() - startMousePos_.x(), endPT.y() - startMousePos_.y());
+{		
+	////if(event->button() & Qt::RightButton)	//moveevnet에서는 button값이 비정상임
+	//
+	//if(event->buttons() == Qt::RightButton)
+	//{		
+	//	QPoint endPT(event->x(), event->y());
+	//	QPoint moveFactor(endPT.x() - startMousePos_.x(), endPT.y() - startMousePos_.y());
 
-		D3DXMATRIXA16 matRotX;
-		D3DXMATRIXA16 matRotY;
+	//	D3DXMATRIXA16 matRotX;
+	//	D3DXMATRIXA16 matRotY;
 
-		//if(moveFactor.x() > 0)						
-		//{
-		//	D3DXMatrixRotationX(&matRotX, 10.f);
-		//	matWorld *= matRotX;
-		//}
-		//else
-		//{
-		//	D3DXMatrixRotationX(&matRotX, -10.f);
-		//	matWorld *= matRotX;
-		//}
+	//	//if(moveFactor.x() > 0)						
+	//	//{
+	//	//	D3DXMatrixRotationX(&matRotX, 10.f);
+	//	//	matWorld *= matRotX;
+	//	//}
+	//	//else
+	//	//{
+	//	//	D3DXMatrixRotationX(&matRotX, -10.f);
+	//	//	matWorld *= matRotX;
+	//	//}
 
-		if(moveFactor.y() > 0)
-		{
-			D3DXMatrixRotationY(&matRotY, 10.f);
-			matWorld *= matRotY;
-		}
-		else
-		{
-			D3DXMatrixRotationY(&matRotY, -10.f);
-			matWorld *= matRotY;
-		}
-	}	
+	//	if(moveFactor.y() > 0)
+	//	{
+	//		D3DXMatrixRotationY(&matRotY, 10.f);
+	//		matWorld *= matRotY;
+	//	}
+	//	else
+	//	{
+	//		D3DXMatrixRotationY(&matRotY, -10.f);
+	//		matWorld *= matRotY;
+	//	}
+	//}	
 }
 
 void QD3DWiew::wheelEvent(QWheelEvent * event)
-{
+{	
 	float delte = event->delta();
 	if(delte > 0.f)
 	{
@@ -107,6 +93,8 @@ void QD3DWiew::wheelEvent(QWheelEvent * event)
 	{
 		eyePos_.z -= 10.f;
 	}
+
+	InitializeCamera();
 }
 
 void QD3DWiew::closeEvent(QCloseEvent * event)

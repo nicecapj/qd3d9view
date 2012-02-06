@@ -11,11 +11,29 @@ purpose:	directx 9.0 control for QT
 #include "define.h"
 #include "defineForTest.h"
 
+#define DXUT_AUTOLIB
+#include "DXUT.h"
+#include "DXUTcamera.h"
+
+#pragma comment(lib,"d3d9.lib")
+#if (defined(_DEBUG) || defined(DEBUG))
+	#pragma comment(lib,"d3dx9d.lib")
+	#pragma comment(lib,"d3dx9d.lib")
+	#pragma comment(lib,"lib/DXUT_d.lib")
+	#pragma comment(lib,"lib/DXUTOpt_d.lib")
+#else
+	#pragma comment(lib,"d3dx9.lib")
+	#pragma comment(lib,"lib/DXUT.lib")
+	#pragma comment(lib,"lib/DXUTOpt.lib")
+	#pragma comment(lib,"d3dx9.lib")
+#endif
+
+
 QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 :QWidget( parent, flags )
 ,pD3D_(0), pDevice_(0)
 ,pVB_(0), pIB_(0), pVertexShader_(0), pConstantTable_(0), pVertexDeclaration_(0)
-,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0), fps_(0.f)
+,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0), fps_(0.f), pModelviewCam_(0)
 {	
 	//버퍼에서 버퍼로 복사후 프레임버퍼로 복사하게 되는데, 버퍼에서 바로 프레임버퍼로 복사하게 한다.
 	//성능향상이 있지만 깜빡임이 나타날 수 있다.
@@ -55,7 +73,8 @@ void QD3DWiew::Render()
 		else
 			pDevice_->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 				
-		SetupGeometryForTest();
+		SetupCamera();
+		//SetupGeometryForTest();		
 		RenderGeometryForTest();
 		DrawFps();
 
@@ -257,6 +276,7 @@ HRESULT	QD3DWiew::RestoreDeviceObjects()
 
 	InitializeValue();
 	InitializeFont();
+	InitializeCamera();
 	InitGeometryForTest();	
 
 	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE );
@@ -304,63 +324,7 @@ void QD3DWiew::ClearDepthStencil(float Z, DWORD Stencil)
 
 void QD3DWiew::Update(float timeMS)
 {
-		
-}
-
-void QD3DWiew::SetupGeometryForTest()
-{
-	//D3DXMATRIXA16 matWorld;	
-	pDevice_->SetTransform(D3DTS_WORLD, &matWorld);
-
-	//D3DXVECTOR3 vEyePt( 0.0f, 3.0f,-80.0f );
-	D3DXVECTOR3 vLookatPt( 0.0f, 0.0f, 80.0f );
-	D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
-	D3DXMATRIXA16 matView;
-	D3DXMatrixLookAtLH( &matView, &eyePos_, &vLookatPt, &vUpVec );
-	pDevice_->SetTransform( D3DTS_VIEW, &matView );	
-	
-	D3DXMATRIXA16 matProj;
-	D3DXMatrixPerspectiveFovLH( &matProj, D3DX_PI / 4, 1.0f, 1.0f, 1000.0f );
-	pDevice_->SetTransform( D3DTS_PROJECTION, &matProj );
-
-	//스크린 공간으로 투영(글짜 출력용)
-	D3DXVec3Project(&screenFontPos_,&objectFontPos_,&viewPort_,&matProj,&matView,&matWorld);
-}
-
-HRESULT QD3DWiew::InitGeometryForTest()
-{		
-	CUSTOMVERTEX vertices[] = 
-	{
-		CUSTOMVERTEX(-1.f , 0.f , 0.f , 0xffff0000),
-		CUSTOMVERTEX(0.f , 1.f , 0.f , 0xff00ff00),
-		CUSTOMVERTEX(1.f , 0.f , 0.f , 0xff0000ff),
-	};
-
-	if(FAILED(pDevice_->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX), 0, D3DFVF_P3F_D, D3DPOOL_DEFAULT, &pVB_, NULL)))
-	{
-		return E_FAIL;
-	}
-
-	void* pVertices;
-	if(FAILED(pVB_->Lock(0, sizeof(vertices), (void**)&pVertices, 0)))
-		return E_FAIL;
-
-	memcpy(pVertices, vertices, sizeof(vertices));
-
-	pVB_->Unlock();
-
-	objectFontPos_ = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-	SetupGeometryForTest();
-
-	return S_OK;
-}
-
-
-void QD3DWiew::RenderGeometryForTest()
-{
-	pDevice_->SetStreamSource(0, pVB_, 0, sizeof(CUSTOMVERTEX));
-	pDevice_->SetFVF(D3DFVF_P3F_D);
-	pDevice_->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 1);
+	pModelviewCam_->FrameMove(timeMS);
 }
 
 void QD3DWiew::Idle()
@@ -413,4 +377,44 @@ void QD3DWiew::InitializeValue()
 	D3DXMatrixIdentity(&matWorld);	 
 	
 	startMousePos_ = QPoint(0,0);
+
+	windowSize_ = size();
+}
+
+void QD3DWiew::InitializeCamera()
+{
+	if(!pModelviewCam_)
+		pModelviewCam_ = new CModelViewerCamera();
+
+	if(!pModelviewCam_)
+		return;	
+
+	D3DXVECTOR3 vLookatPt( 0.0f, 0.0f, 80.0f );
+	D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
+
+	//DX 카메라
+	pModelviewCam_->SetViewParams(&eyePos_, &vLookatPt);
+	pModelviewCam_->SetProjParams(D3DX_PI / 4, 1.0f, 1.0f, 1000.f);	
+	GetModelViewCamera()->SetWindow(windowSize_.width(), windowSize_.height());
+
+	//스크린 공간으로 투영(글짜 출력용)
+	D3DXVec3Project(&screenFontPos_,&objectFontPos_,&viewPort_,
+		GetModelViewCamera()->GetProjMatrix(),
+		GetModelViewCamera()->GetViewMatrix(),
+		GetModelViewCamera()->GetWorldMatrix());
+}
+
+CModelViewerCamera* QD3DWiew::GetModelViewCamera()
+{
+	return (CModelViewerCamera*)pModelviewCam_;
+}
+
+void QD3DWiew::SetupCamera()
+{
+	if(pModelviewCam_)
+	{
+		pDevice_->SetTransform( D3DTS_WORLD, GetModelViewCamera()->GetWorldMatrix());	
+		pDevice_->SetTransform( D3DTS_VIEW, GetModelViewCamera()->GetViewMatrix() );	
+		pDevice_->SetTransform( D3DTS_PROJECTION, GetModelViewCamera()->GetProjMatrix());
+	}
 }
