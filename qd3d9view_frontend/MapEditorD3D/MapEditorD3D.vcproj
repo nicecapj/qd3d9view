@@ -404,6 +404,10 @@
 				RelativePath=".\QD3D9View_MsgHandler.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\QD3D9View_Test.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="DXUT"
