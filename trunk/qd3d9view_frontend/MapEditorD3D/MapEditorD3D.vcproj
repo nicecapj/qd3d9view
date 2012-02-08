@@ -408,6 +408,14 @@
 				RelativePath=".\QD3D9View_Test.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\TextureManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextureManager.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="DXUT"

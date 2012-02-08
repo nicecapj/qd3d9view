@@ -16,6 +16,7 @@ public:
 public slots:
 	void SetRenderModeWire();
 	void SetRenderModeSolid();
+	bool ImportHeightmap();
 
 private:
 	Ui::MapEditorD3DClass ui;
