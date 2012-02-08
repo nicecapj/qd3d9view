@@ -21,6 +21,7 @@
 //------------------------------------------------------------------------------
 class CBaseCamera;
 class CModelViewerCamera;
+class TextureManager;
 class QD3DWiew : public QWidget
 {
 	Q_OBJECT
@@ -50,6 +51,9 @@ public:
 		rdCount,
 	};
 	void SetRenderMode(renderMode mode);
+	bool ImportHeightmap(QString filename);
+
+	TextureManager* GetTextureManager() { return pTextureManager; }
 
 public slots:
 		void Idle();
@@ -168,7 +172,11 @@ private:
 	D3DXVECTOR3 eyePos_;	
 	D3DXMATRIXA16 matWorld;
 
-	QSize windowSize_;
+	QSize windowSize_;		
+	
+	bool InitVBforHeightmap();
+	bool InitIBforHeightmap();
+	TextureManager* pTextureManager;
 };
 
 #endif  __QT_DIRECTX_WIEW_H__

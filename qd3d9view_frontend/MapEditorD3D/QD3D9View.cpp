@@ -8,8 +8,10 @@ purpose:	directx 9.0 control for QT
 *******************************************************************************/
 #include "QD3D9View.h"
 #include <Windows.h>
+#include <qstring.h>
 #include "define.h"
 #include "defineForTest.h"
+#include "TextureManager.h"
 
 #define DXUT_AUTOLIB
 #include "DXUT.h"
@@ -33,7 +35,8 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 :QWidget( parent, flags )
 ,pD3D_(0), pDevice_(0)
 ,pVB_(0), pIB_(0), pVertexShader_(0), pConstantTable_(0), pVertexDeclaration_(0)
-,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0), fps_(0.f), pModelviewCam_(0)
+,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0), fps_(0.f)
+,pModelviewCam_(0), pTextureManager(0)
 {	
 	//버퍼에서 버퍼로 복사후 프레임버퍼로 복사하게 되는데, 버퍼에서 바로 프레임버퍼로 복사하게 한다.
 	//성능향상이 있지만 깜빡임이 나타날 수 있다.
@@ -74,7 +77,7 @@ void QD3DWiew::Render()
 			pDevice_->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 				
 		SetupCamera();
-		//SetupGeometryForTest();		
+
 		RenderGeometryForTest();
 		DrawFps();
 
@@ -253,7 +256,8 @@ HRESULT QD3DWiew::Initialize()
 		hr = RestoreDeviceObjects();
 	}
 
-	
+	pTextureManager = new TextureManager(pDevice_);
+
 
 	timer_.start();
 
@@ -263,7 +267,8 @@ HRESULT QD3DWiew::Initialize()
 void QD3DWiew::Finalize()
 {	
 	InvalidateDeviceObjects();		
-	
+
+	SAFE_DELETE(pTextureManager);
 	SAFE_DELETE(pModelviewCam_);
 	SAFE_RELEASE(pDevice_);
 	SAFE_RELEASE(pD3D_);	
@@ -426,4 +431,27 @@ void QD3DWiew::SetRenderMode(renderMode mode)
 		isWireMode_ = false;
 	else
 		isWireMode_ = true;
+}
+
+bool QD3DWiew::ImportHeightmap(QString filename)
+{	
+	if(!pTextureManager)
+		return false;
+
+	LPDIRECT3DTEXTURE9 pTexture = pTextureManager->LoadTextureFromFile(filename.toStdString());
+	if(!pTexture)
+		return false;
+
+
+	return true;
+}
+
+bool QD3DWiew::InitVBforHeightmap()
+{
+	return true;
+}
+
+bool QD3DWiew::InitIBforHeightmap()
+{
+	return true;
 }

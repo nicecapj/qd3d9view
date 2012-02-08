@@ -36,6 +36,19 @@
     </widget>
     <addaction name="menuRenderMode"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuImport">
+     <property name="title">
+      <string>Import</string>
+     </property>
+     <addaction name="actionImportHeightmap"/>
+    </widget>
+    <addaction name="menuImport"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuRender"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -55,6 +68,16 @@
   <action name="actionWire">
    <property name="text">
     <string>Wire</string>
+   </property>
+  </action>
+  <action name="actionOepn">
+   <property name="text">
+    <string>Oepn</string>
+   </property>
+  </action>
+  <action name="actionImportHeightmap">
+   <property name="text">
+    <string>Heightmap</string>
    </property>
   </action>
  </widget>

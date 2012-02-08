@@ -1,7 +1,9 @@
 #include "mapeditord3d.h"
 #include "QD3D9View.h"
 #include <QMessageBox>
+#include <qfiledialog.h>
 #include "define.h"
+#include "TextureManager.h"
 
 MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -29,6 +31,7 @@ MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 		{
 			QObject::connect(ui.actionWire, SIGNAL(triggered()), this, SLOT(SetRenderModeWire()));    
 			QObject::connect(ui.actionSolid, SIGNAL(triggered()), this, SLOT(SetRenderModeSolid()));    
+			QObject::connect(ui.actionImportHeightmap, SIGNAL(triggered()), this, SLOT(ImportHeightmap()));    
 		}
 
 		//pD3DWidget_->show();
@@ -51,4 +54,17 @@ void MapEditorD3D::SetRenderModeSolid()
 {
 	if(pD3DWidget_)
 		pD3DWidget_->SetRenderMode(QD3DWiew::rdSolid);
+}
+
+bool MapEditorD3D::ImportHeightmap()
+{
+	QString fileFilters = tr("HeightMap(*.bmp)");
+	QString caption = tr("Select Heightmap image");
+	QDir dir;
+	QString dirStr = dir.currentPath();
+	QString selectName = QFileDialog::getOpenFileName(this, caption, dirStr, fileFilters);
+	if(selectName.isEmpty())
+		return false;
+
+	return pD3DWidget_->ImportHeightmap(selectName);	
 }
