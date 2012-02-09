@@ -78,7 +78,12 @@ void QD3DWiew::Render()
 				
 		SetupCamera();
 
-		RenderGeometryForTest();
+		//SetupLight();
+
+		if(mapCellNum_ == 0)
+			RenderGeometryForTest();
+		else
+			RenderHeightMap();
 		DrawFps();
 
 		EndScene();						
@@ -283,9 +288,9 @@ HRESULT	QD3DWiew::RestoreDeviceObjects()
 	InitializeValue();
 	InitializeFont();
 	InitializeCamera();
-	InitGeometryForTest();	
+	InitGeometryForTest();		
 
-	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE );
+	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE);
 	pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 	//pDevice_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
 
@@ -385,6 +390,8 @@ void QD3DWiew::InitializeValue()
 	startMousePos_ = QPoint(0,0);
 
 	windowSize_ = size();
+
+	mapCellNum_ = 0;
 }
 
 void QD3DWiew::InitializeCamera()
@@ -442,16 +449,170 @@ bool QD3DWiew::ImportHeightmap(QString filename)
 	if(!pTexture)
 		return false;
 
+	D3DSURFACE_DESC desc;
+	pTexture->GetLevelDesc(0, &desc);
+	UINT width = desc.Width;
+	UINT height = desc.Height;
+	mapCellNum_	= width;
+
+	if(!InitVBforHeightmap(pTexture))
+		return false;
+
+	if(!InitIBforHeightmap(pTexture))
+		return false;
 
 	return true;
 }
 
-bool QD3DWiew::InitVBforHeightmap()
+bool QD3DWiew::InitVBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
 {
+	if(pVB_)
+		SAFE_RELEASE(pVB_);
+		
+	
+	if(FAILED( pDevice_->CreateVertexBuffer(mapCellNum_ * mapCellNum_ * sizeof(TerrainVertex), 0, D3DFVF_TERRAIN, D3DPOOL_DEFAULT, &pVB_, NULL)) )
+	{
+		return false;
+	}
+
+	//텍츠쳐 메모리 락
+	D3DLOCKED_RECT textureRect;
+	pTexture->LockRect(0, &textureRect, 0, D3DLOCK_READONLY);
+	
+	void* pVertices = 0;	
+	if(FAILED(pVB_->Lock(0, mapCellNum_ * mapCellNum_ * sizeof(TerrainVertex), (void**)&pVertices, 0)))
+		return false;
+
+	//디버깅시만 메모리 소거
+	ZeroMemory(pVertices, mapCellNum_ * mapCellNum_ * sizeof(TerrainVertex));
+
+	TerrainVertex v;
+	TerrainVertex* pV = (TerrainVertex*)pVertices;
+
+	for(DWORD z = 0 ; z < mapCellNum_; ++z)
+	{
+		for(DWORD x = 0 ; x < mapCellNum_ ; ++x)
+		{
+			v.pos.x = x * CELL_SIZE / 2.0f;		//원점 정렬
+			v.pos.z = (z * CELL_SIZE / 2.0f);	//z좌표가 반대임으로 -
+			v.pos.y = (float)(*((LPDWORD)textureRect.pBits + x + z * (textureRect.Pitch/4)) & 0x000000ff) * CELL_HEIGHT;
+			v.n.x = 0.f;//v.pos.x;
+			v.n.y = v.pos.y;
+			v.n.z = 0.f;//v.pos.z;
+			
+			v.color = D3DXCOLOR(255.f, 0.f, 0.f, 1.0f);
+
+			D3DXVec3Normalize(&v.n, &v.n);
+//			qDebug("vb  :%f %f %f", v.pos.x, v.pos.y, v.pos.z);
+
+			*pV++ = v;
+		}
+	}
+
+
+	pVB_->Unlock();
+	
+	pTexture->UnlockRect(0);
+	
+
 	return true;
 }
 
-bool QD3DWiew::InitIBforHeightmap()
+bool QD3DWiew::InitIBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
 {
+	if(pIB_)
+		SAFE_RELEASE(pIB_);
+
+	//사각형당 2개의 폴리곤 x 3개의 인덱스
+	if(FAILED(pDevice_->CreateIndexBuffer((mapCellNum_ - 1) * (mapCellNum_ - 1)* 2 * sizeof(WORD) * 3,
+		0,
+		D3DFMT_INDEX16,
+		D3DPOOL_MANAGED,
+		&pIB_,
+		NULL)))
+		return false;
+
+
+	WORD* pIndicies = NULL;
+	int index = 0;
+	if(FAILED(pIB_->Lock(0, (mapCellNum_ - 1) * (mapCellNum_ - 1) * 2 * sizeof(WORD) * 3, (VOID**)&pIndicies, 0)))
+		return false;
+
+	for(int z = 0 ; z < mapCellNum_ - 1 ; ++z)
+	{
+		for(int x = 0 ; x < mapCellNum_ - 1 ; ++x)
+		{                        
+			pIndicies[0 + index] = z * mapCellNum_ + x;
+			pIndicies[1 + index] = (z + 1) * mapCellNum_ + x;            
+			pIndicies[2 + index] = z * mapCellNum_ + (x + 1);            
+			pIndicies[3 + index] = z * mapCellNum_ + (x + 1);
+			pIndicies[4 + index] = (z + 1) * mapCellNum_ + x;
+			pIndicies[5 + index] = (z + 1) * mapCellNum_ + (x + 1);            
+
+			//qDebug("IB : %d %d %d -> %d %d %d",pIndicies[0+index], pIndicies[1+index], pIndicies[2+index],
+			//	pIndicies[3+index], pIndicies[4+index], pIndicies[5+index]);
+
+			index += 6;
+		}
+	}
+	pIB_->Unlock();
+
 	return true;
+}
+
+D3DMATERIAL9 QD3DWiew::InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR e, float p)
+{
+	D3DMATERIAL9 mtrl;
+	mtrl.Ambient  = a;
+	mtrl.Diffuse  = d;
+	mtrl.Specular = s;
+	mtrl.Emissive = e;
+	mtrl.Power    = p;
+	return mtrl;
+}
+
+D3DLIGHT9 QD3DWiew::InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color)
+{
+	D3DLIGHT9 light;
+	::ZeroMemory(&light, sizeof(light));
+
+	light.Type      = D3DLIGHT_DIRECTIONAL;
+	light.Ambient   = *color * 0.4f;
+	light.Diffuse   = *color;
+	light.Specular  = *color * 0.6f;
+	light.Direction = *direction;
+
+	return light;
+}
+
+void QD3DWiew::RenderHeightMap()
+{	
+	if(mapCellNum_ == 0)
+		return;
+
+	pDevice_->SetStreamSource(0, pVB_, 0, sizeof(D3DFVF_TERRAIN));
+	pDevice_->SetFVF(D3DFVF_TERRAIN);
+	pDevice_->SetIndices(pIB_);	
+	pDevice_->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+		0,
+		0,
+		mapCellNum_ * mapCellNum_,
+		0,
+		(mapCellNum_ - 1) * (mapCellNum_ - 1) * 2);
+}
+
+void QD3DWiew::SetupLight()
+{
+	D3DXVECTOR3 dir(-2.0f, 0.0f, 0.507f);
+	D3DXCOLOR col(0.9f, 0.9f, 1.0f, 1.0f);
+	D3DLIGHT9 light = InitDirectionalLight(&dir, &col);
+
+	D3DMATERIAL9 mtrl  = InitMtrl(WHITE, WHITE, WHITE, BLACK, 2.0f);
+	pDevice_->SetMaterial(&mtrl);
+
+	pDevice_->SetLight(0, &light);
+	pDevice_->SetRenderState(D3DRS_NORMALIZENORMALS, true);
+	pDevice_->SetRenderState(D3DRS_SPECULARENABLE, true);
+
+	pDevice_->LightEnable(0, true);
 }
