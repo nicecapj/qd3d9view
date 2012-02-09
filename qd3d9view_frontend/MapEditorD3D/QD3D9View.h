@@ -134,8 +134,13 @@ private:
 	HRESULT InitGeometryForTest();
 	void    FinalzeGeometryForTest();
 	void	RenderGeometryForTest();
+	D3DMATERIAL9 InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR e, float p);
+	D3DLIGHT9 InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color);
+	void	SetupLight();
+	void    RenderHeightMap();
+	UINT	mapCellNum_;	
 
-
+private:
 	LPDIRECT3DVERTEXBUFFER9         pVB_;
 	LPDIRECT3DINDEXBUFFER9          pIB_;
 
@@ -174,8 +179,8 @@ private:
 
 	QSize windowSize_;		
 	
-	bool InitVBforHeightmap();
-	bool InitIBforHeightmap();
+	bool InitVBforHeightmap(LPDIRECT3DTEXTURE9 pTexture);
+	bool InitIBforHeightmap(LPDIRECT3DTEXTURE9 pTexture);
 	TextureManager* pTextureManager;
 };
 
