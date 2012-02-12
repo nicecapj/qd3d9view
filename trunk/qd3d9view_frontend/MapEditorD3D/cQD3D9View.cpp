@@ -6,7 +6,7 @@ author:		DRAGONKING(gmail.com)
 
 purpose:	directx 9.0 control for QT
 *******************************************************************************/
-#include "QD3D9View.h"
+#include "cQD3D9View.h"
 #include <Windows.h>
 #include <qstring.h>
 #include "define.h"
@@ -635,14 +635,4 @@ void cQD3DView::SetupLight()
 	pDevice_->SetRenderState(D3DRS_SPECULARENABLE, true);
 
 	pDevice_->LightEnable(0, true);
-}
-
-void cQD3DView::ReleaseVertexBuffer()
-{
-	SAFE_RELEASE(pVB_);
-}
-
-void cQD3DView::ReleaseIndexBuffer()
-{	
-	SAFE_RELEASE(pIB_);	
 }

@@ -304,7 +304,7 @@
 				SourceControlFiles="false"
 				>
 				<File
-					RelativePath=".\GeneratedFiles\Release\moc_mapeditord3d.cpp"
+					RelativePath=".\GeneratedFiles\Release\moc_cQD3D9View.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -316,7 +316,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\GeneratedFiles\Release\moc_QD3D9View.cpp"
+					RelativePath=".\GeneratedFiles\Release\moc_mapeditord3d.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -334,7 +334,7 @@
 				SourceControlFiles="false"
 				>
 				<File
-					RelativePath=".\GeneratedFiles\Debug\moc_mapeditord3d.cpp"
+					RelativePath=".\GeneratedFiles\Debug\moc_cQD3D9View.cpp"
 					>
 					<FileConfiguration
 						Name="Release|Win32"
@@ -346,7 +346,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\GeneratedFiles\Debug\moc_QD3D9View.cpp"
+					RelativePath=".\GeneratedFiles\Debug\moc_mapeditord3d.cpp"
 					>
 					<FileConfiguration
 						Name="Release|Win32"
@@ -363,35 +363,11 @@
 			Name="QD3DWidget"
 			>
 			<File
-				RelativePath=".\cTestRoutine.cpp"
+				RelativePath=".\cQD3D9View.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\cTestRoutine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\cTextureManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\cTextureManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\define.h"
-				>
-			</File>
-			<File
-				RelativePath=".\defineForTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\QD3D9View.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\QD3D9View.h"
+				RelativePath=".\cQD3D9View.h"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -417,11 +393,35 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\QD3D9View_MsgHandler.cpp"
+				RelativePath=".\cQD3D9View_MsgHandler.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\QD3D9View_Test.cpp"
+				RelativePath=".\cQD3D9View_Test.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cTestRoutine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cTestRoutine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cTextureManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cTextureManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\define.h"
+				>
+			</File>
+			<File
+				RelativePath=".\defineForTest.h"
 				>
 			</File>
 		</Filter>

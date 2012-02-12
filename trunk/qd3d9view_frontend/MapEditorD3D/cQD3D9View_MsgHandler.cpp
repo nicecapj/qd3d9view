@@ -6,7 +6,7 @@
 	
 	purpose:	process windows message
 *********************************************************************/
-#include "QD3D9View.h"
+#include "cQD3D9View.h"
 #include <qevent.h>
 
 #define DXUT_AUTOLIB

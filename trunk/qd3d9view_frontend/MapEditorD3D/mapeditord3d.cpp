@@ -1,5 +1,5 @@
 #include "mapeditord3d.h"
-#include "QD3D9View.h"
+#include "cQD3D9View.h"
 #include <QMessageBox>
 #include <qfiledialog.h>
 #include "define.h"

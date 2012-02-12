@@ -7,7 +7,7 @@ author:		DRAGONKING(nicecapj@gmail.com)
 purpose:	test routine
 *********************************************************************/
 #include "cTestRoutine.h"
-#include "QD3D9View.h"
+#include "cQD3D9View.h"
 #include "defineForTest.h"
 
 cTestRoutine::cTestRoutine(cQD3DView* pD3DView)
