@@ -1,30 +1,30 @@
 /********************************************************************
 created:	2012/02/09
 created:	2012:9:2   4:34
-filename: 	TextureManager.h		
+filename: 	cTextureManager.h		
 author:		DRAGONKING(gmail.com)
 
 purpose:	symple texture manager
 *********************************************************************/
-#include "TextureManager.h"
+#include "cTextureManager.h"
 
 #define DXUT_AUTOLIB
-#include "DXUT.h"
-#include "DXUTcamera.h"
+#include "../DXUtil/DXUT.h"
+#include "../DXUtil/DXUTcamera.h"
 
-TextureManager::TextureManager(IDirect3DDevice9* device):pDevice_(device)
+cTextureManager::cTextureManager(IDirect3DDevice9* device):pDevice_(device)
 {
 
 }
 
 
-TextureManager::~TextureManager()
+cTextureManager::~cTextureManager()
 {
 	SafeReleaseMap(textures_);
 }
 
 
-LPDIRECT3DTEXTURE9 TextureManager::LoadTextureFromFile(const std::string& filename)
+LPDIRECT3DTEXTURE9 cTextureManager::LoadTextureFromFile(const std::string& filename)
 {
 	if(!pDevice_)
 		return 0;

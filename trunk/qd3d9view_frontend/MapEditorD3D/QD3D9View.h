@@ -21,15 +21,16 @@
 //------------------------------------------------------------------------------
 class CBaseCamera;
 class CModelViewerCamera;
-class TextureManager;
-class QD3DWiew : public QWidget
+class cTextureManager;
+class cTestRoutine;
+class cQD3DView : public QWidget
 {
 	Q_OBJECT
 
 public:		
 
-	QD3DWiew(QWidget *parent = 0, Qt::WFlags flags = 0);
-	~QD3DWiew();
+	cQD3DView(QWidget *parent = 0, Qt::WFlags flags = 0);
+	~cQD3DView();
 
 	HRESULT Initialize();
 	void	Finalize();
@@ -40,8 +41,8 @@ public:
 	void Render();
 	void PostRender();
 
-	const IDirect3D9*	GetD3D() { return pD3D_; }
-	const IDirect3DDevice9* GetD3DDevice() { return pDevice_; }	
+	IDirect3D9*	GetD3D() { return pD3D_; }
+	IDirect3DDevice9* GetD3DDevice() { return pDevice_; }	
 
 	//tool
 	enum renderMode
@@ -53,7 +54,9 @@ public:
 	void SetRenderMode(renderMode mode);
 	bool ImportHeightmap(QString filename);
 
-	TextureManager* GetTextureManager() { return pTextureManager; }
+	cTextureManager* GetcTextureManager() { return pcTextureManager; }
+	LPDIRECT3DVERTEXBUFFER9 GetVertexBuffer() { return pVB_; }
+	LPDIRECT3DINDEXBUFFER9 GetIndexBuffer() { return pIB_; }	
 
 public slots:
 		void Idle();
@@ -129,11 +132,7 @@ private:
 	CModelViewerCamera* GetModelViewCamera();
 	void SetupCamera();
 
-	//test
-	void	SetupGeometryForTest();
-	HRESULT InitGeometryForTest();
-	void    FinalzeGeometryForTest();
-	void	RenderGeometryForTest();
+
 	D3DMATERIAL9 InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR e, float p);
 	D3DLIGHT9 InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color);
 	void	SetupLight();
@@ -181,7 +180,8 @@ private:
 	
 	bool InitVBforHeightmap(LPDIRECT3DTEXTURE9 pTexture);
 	bool InitIBforHeightmap(LPDIRECT3DTEXTURE9 pTexture);
-	TextureManager* pTextureManager;
+	cTextureManager* pcTextureManager;
+	cTestRoutine* pTestRoutine_;
 };
 
 #endif  __QT_DIRECTX_WIEW_H__

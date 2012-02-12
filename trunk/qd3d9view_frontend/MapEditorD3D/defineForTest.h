@@ -14,6 +14,14 @@ struct CUSTOMVERTEX
 	FLOAT x, y, z;      // The untransformed, 3D position for the vertex
 	DWORD color;			  // The vertex color	
 
+	CUSTOMVERTEX()
+	{
+		x = 0.f;
+		y = 0.f;
+		z = 0.f;
+		color = 0;
+	}
+
 	CUSTOMVERTEX(float fx, float fy, float fz, DWORD c)
 	{
 		x = fx;

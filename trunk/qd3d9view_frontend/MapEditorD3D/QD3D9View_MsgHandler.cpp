@@ -10,10 +10,10 @@
 #include <qevent.h>
 
 #define DXUT_AUTOLIB
-#include "DXUT.h"
-#include "DXUTcamera.h"
+#include "../DXUtil/DXUT.h"
+#include "../DXUtil/DXUTcamera.h"
 
-bool QD3DWiew::winEvent(MSG *message, long *result)
+bool cQD3DView::winEvent(MSG *message, long *result)
 {
 	if(SUCCEEDED(DefWindowProc(message->hwnd, message->message, message->wParam, message->lParam)))
 		*result = 1;
@@ -27,7 +27,7 @@ bool QD3DWiew::winEvent(MSG *message, long *result)
 
 }
 
-void QD3DWiew::mousePressEvent(QMouseEvent * event)
+void cQD3DView::mousePressEvent(QMouseEvent * event)
 {
 	//if(event->button() & Qt::RightButton)
 	//{		
@@ -36,17 +36,17 @@ void QD3DWiew::mousePressEvent(QMouseEvent * event)
 	//}
 }
 
-void QD3DWiew::mouseReleaseEvent(QMouseEvent * event)
+void cQD3DView::mouseReleaseEvent(QMouseEvent * event)
 {
 
 }
 
-void QD3DWiew::mouseDoubleClickEvent(QMouseEvent * event)
+void cQD3DView::mouseDoubleClickEvent(QMouseEvent * event)
 {
 
 }
 
-void QD3DWiew::mouseMoveEvent(QMouseEvent * event)
+void cQD3DView::mouseMoveEvent(QMouseEvent * event)
 {		
 	////if(event->button() & Qt::RightButton)	//moveevnet에서는 button값이 비정상임
 	//
@@ -82,7 +82,7 @@ void QD3DWiew::mouseMoveEvent(QMouseEvent * event)
 	//}	
 }
 
-void QD3DWiew::wheelEvent(QWheelEvent * event)
+void cQD3DView::wheelEvent(QWheelEvent * event)
 {	
 	float delte = event->delta();
 	if(delte > 0.f)
@@ -97,12 +97,12 @@ void QD3DWiew::wheelEvent(QWheelEvent * event)
 	InitializeCamera();
 }
 
-void QD3DWiew::closeEvent(QCloseEvent * event)
+void cQD3DView::closeEvent(QCloseEvent * event)
 {
 
 }
 
-void QD3DWiew::paintEvent(QPaintEvent *paintE)
+void cQD3DView::paintEvent(QPaintEvent *paintE)
 {
 	Q_UNUSED(paintE);
 	
@@ -113,7 +113,7 @@ void QD3DWiew::paintEvent(QPaintEvent *paintE)
 }
 
 //리사이즈하게 되면, 디바이스등등 소실된다.
-void QD3DWiew::resizeEvent(QResizeEvent *p_event)
+void cQD3DView::resizeEvent(QResizeEvent *p_event)
 {
 	QSize newSize = size();
 	if(p_event)

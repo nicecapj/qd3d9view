@@ -3,14 +3,14 @@
 #include <QMessageBox>
 #include <qfiledialog.h>
 #include "define.h"
-#include "TextureManager.h"
+#include "cTextureManager.h"
 
 MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
 	ui.setupUi(this);
 
-	pD3DWidget_ = new QD3DWiew(this);
+	pD3DWidget_ = new cQD3DView(this);
 	if(pD3DWidget_)
 	{
 		setCentralWidget(pD3DWidget_);	//안해주면 엄한 위치에 붙어있다.
@@ -47,13 +47,13 @@ MapEditorD3D::~MapEditorD3D()
 void MapEditorD3D::SetRenderModeWire()
 {
 	if(pD3DWidget_)
-		pD3DWidget_->SetRenderMode(QD3DWiew::rdWire);
+		pD3DWidget_->SetRenderMode(cQD3DView::rdWire);
 }
 
 void MapEditorD3D::SetRenderModeSolid()
 {
 	if(pD3DWidget_)
-		pD3DWidget_->SetRenderMode(QD3DWiew::rdSolid);
+		pD3DWidget_->SetRenderMode(cQD3DView::rdSolid);
 }
 
 bool MapEditorD3D::ImportHeightmap()
