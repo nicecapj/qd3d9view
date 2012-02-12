@@ -180,6 +180,10 @@ private:
 	
 	bool InitVBforHeightmap(LPDIRECT3DTEXTURE9 pTexture);
 	bool InitIBforHeightmap(LPDIRECT3DTEXTURE9 pTexture);
+	void RenderSLODTileForTest();
+	bool InitVBIBforTLODTest();
+	QString loadedHeightmapfilename_;
+
 	cTextureManager* pcTextureManager;
 	cTestRoutine* pTestRoutine_;
 };

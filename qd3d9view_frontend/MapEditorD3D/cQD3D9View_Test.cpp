@@ -6,7 +6,7 @@
 	
 	purpose:	test routine
 *********************************************************************/
-#include "QD3D9View.h"
+#include "cQD3D9View.h"
 #include "define.h"
 #include "defineForTest.h"
 
