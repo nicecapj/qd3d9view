@@ -363,6 +363,22 @@
 			Name="QD3DWidget"
 			>
 			<File
+				RelativePath=".\cTestRoutine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cTestRoutine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cTextureManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cTextureManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\define.h"
 				>
 			</File>
@@ -408,18 +424,6 @@
 				RelativePath=".\QD3D9View_Test.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\TextureManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TextureManager.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="DXUT"
-			>
 		</Filter>
 		<File
 			RelativePath=".\ClassDiagram1.cd"

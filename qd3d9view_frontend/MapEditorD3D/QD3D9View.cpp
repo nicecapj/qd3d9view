@@ -11,11 +11,12 @@ purpose:	directx 9.0 control for QT
 #include <qstring.h>
 #include "define.h"
 #include "defineForTest.h"
-#include "TextureManager.h"
+#include "cTextureManager.h"
+#include "cTestRoutine.h"
 
 #define DXUT_AUTOLIB
-#include "DXUT.h"
-#include "DXUTcamera.h"
+#include "../DXUtil/DXUT.h"
+#include "../DXUtil/DXUTcamera.h"
 
 #pragma comment(lib,"d3d9.lib")
 #if (defined(_DEBUG) || defined(DEBUG))
@@ -31,12 +32,12 @@ purpose:	directx 9.0 control for QT
 #endif
 
 
-QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
+cQD3DView::cQD3DView(QWidget *parent, Qt::WFlags flags)
 :QWidget( parent, flags )
 ,pD3D_(0), pDevice_(0)
 ,pVB_(0), pIB_(0), pVertexShader_(0), pConstantTable_(0), pVertexDeclaration_(0)
 ,pPixelShader_(0), isWireMode_(false), appTime_(0.f), pFont_(0), fps_(0.f)
-,pModelviewCam_(0), pTextureManager(0)
+,pModelviewCam_(0), pcTextureManager(0), pTestRoutine_(0)
 {	
 	//버퍼에서 버퍼로 복사후 프레임버퍼로 복사하게 되는데, 버퍼에서 바로 프레임버퍼로 복사하게 한다.
 	//성능향상이 있지만 깜빡임이 나타날 수 있다.
@@ -51,19 +52,19 @@ QD3DWiew::QD3DWiew(QWidget *parent, Qt::WFlags flags)
 	timer_.setSingleShot( false ) ;		//정해진 시간후에 한번 호출하는 방식은 사용하지 않는다.
 	QObject::connect( &timer_, SIGNAL( timeout() ), this, SLOT( Idle() ) ) ;
 
-	InitializeValue();
+	InitializeValue();		
 }
 
-QD3DWiew::~QD3DWiew()
+cQD3DView::~cQD3DView()
 {
 	Finalize();
 }
 
-void QD3DWiew::PreRender()
+void cQD3DView::PreRender()
 {
 }
 
-void QD3DWiew::Render()
+void cQD3DView::Render()
 {		
 	HRESULT hr = S_OK;
 
@@ -76,12 +77,14 @@ void QD3DWiew::Render()
 		else
 			pDevice_->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 				
+		//SetupGeometryForTest();
 		SetupCamera();
 
 		//SetupLight();
 
 		if(mapCellNum_ == 0)
-			RenderGeometryForTest();
+			//RenderGeometryForTest();
+			pTestRoutine_->RenderSLODTileForTest();
 		else
 			RenderHeightMap();
 		DrawFps();
@@ -96,11 +99,11 @@ void QD3DWiew::Render()
 	hr = Present();
 }
 
-void QD3DWiew::PostRender()
+void cQD3DView::PostRender()
 {
 }
 
-HRESULT	QD3DWiew::BeginScene()
+HRESULT	cQD3DView::BeginScene()
 {
 	if(!pDevice_)
 		return E_FAIL;	
@@ -108,7 +111,7 @@ HRESULT	QD3DWiew::BeginScene()
 	return pDevice_->BeginScene();
 }
 
-HRESULT	QD3DWiew::EndScene()
+HRESULT	cQD3DView::EndScene()
 {
 	if(!pDevice_)
 		return E_FAIL;
@@ -116,7 +119,7 @@ HRESULT	QD3DWiew::EndScene()
 	return pDevice_->EndScene();
 }
 
-HRESULT	QD3DWiew::Present()
+HRESULT	cQD3DView::Present()
 {
 	if(!pDevice_)
 		return E_FAIL;
@@ -176,7 +179,7 @@ HRESULT	QD3DWiew::Present()
 	return hr;
 }
 
-HRESULT QD3DWiew::Initialize()
+HRESULT cQD3DView::Initialize()
 {
 	HRESULT hr = S_OK;
 	
@@ -256,12 +259,11 @@ HRESULT QD3DWiew::Initialize()
 		}
 	}
 
-	if (SUCCEEDED(hr))
-	{
-		hr = RestoreDeviceObjects();
-	}
+	pTestRoutine_ = new cTestRoutine(this);
+	pcTextureManager = new cTextureManager(pDevice_);
 
-	pTextureManager = new TextureManager(pDevice_);
+	RestoreDeviceObjects();
+	
 
 
 	timer_.start();
@@ -269,18 +271,18 @@ HRESULT QD3DWiew::Initialize()
 	return S_OK;
 }
 
-void QD3DWiew::Finalize()
+void cQD3DView::Finalize()
 {	
 	InvalidateDeviceObjects();		
 
-	SAFE_DELETE(pTextureManager);
+	SAFE_DELETE(pcTextureManager);
 	SAFE_DELETE(pModelviewCam_);
 	SAFE_RELEASE(pDevice_);
 	SAFE_RELEASE(pD3D_);	
 }
 
 //복구 처리
-HRESULT	QD3DWiew::RestoreDeviceObjects()
+HRESULT	cQD3DView::RestoreDeviceObjects()
 {
 	if(!pDevice_)
 		return E_FAIL;		
@@ -288,7 +290,8 @@ HRESULT	QD3DWiew::RestoreDeviceObjects()
 	InitializeValue();
 	InitializeFont();
 	InitializeCamera();
-	InitGeometryForTest();		
+	//pTestRoutine_->InitGeometryForTest();		
+	pTestRoutine_->InitVBIBforTLODTest();
 
 	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE);
 	pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
@@ -300,7 +303,7 @@ HRESULT	QD3DWiew::RestoreDeviceObjects()
 }
 
 //무효화 처리
-HRESULT QD3DWiew::InvalidateDeviceObjects()
+HRESULT cQD3DView::InvalidateDeviceObjects()
 {
 	if(!pDevice_)
 		return E_FAIL;
@@ -315,7 +318,7 @@ HRESULT QD3DWiew::InvalidateDeviceObjects()
 	return S_OK;
 }
 
-void QD3DWiew::ClearScene(D3DXCOLOR ClearColor, float Z, DWORD Stencil)
+void cQD3DView::ClearScene(D3DXCOLOR ClearColor, float Z, DWORD Stencil)
 {
 	if(!pDevice_)
 		return;
@@ -323,22 +326,22 @@ void QD3DWiew::ClearScene(D3DXCOLOR ClearColor, float Z, DWORD Stencil)
 	pDevice_->Clear( 0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, (DWORD)ClearColor, Z, Stencil );
 }
 
-void QD3DWiew::ClearRenderTarget(D3DXCOLOR ClearColor)
+void cQD3DView::ClearRenderTarget(D3DXCOLOR ClearColor)
 {
 	pDevice_->Clear( 0, 0, D3DCLEAR_TARGET,(DWORD)ClearColor, 1.0f, 0 );
 }
 
-void QD3DWiew::ClearDepthStencil(float Z, DWORD Stencil)
+void cQD3DView::ClearDepthStencil(float Z, DWORD Stencil)
 {
 
 }
 
-void QD3DWiew::Update(float timeMS)
+void cQD3DView::Update(float timeMS)
 {
 	pModelviewCam_->FrameMove(timeMS);
 }
 
-void QD3DWiew::Idle()
+void cQD3DView::Idle()
 {
 	appTime_ += timer_.interval() * 0.01;
 
@@ -363,13 +366,13 @@ void QD3DWiew::Idle()
 	}
 }
 
-void QD3DWiew::InitializeFont()
+void cQD3DView::InitializeFont()
 {
 	hFont_ = (HFONT)GetStockObject(SYSTEM_FONT);
 	D3DXCreateFont(pDevice_, 20, 10, 1, TRUE, 1, 1, 5, 1,  NULL,L"Courier", &pFont_);	
 }
 
-void QD3DWiew::DrawFps()
+void cQD3DView::DrawFps()
 {
 	RECT TextRect = {0.f, 0.f, 200.f, 100.f};
 	char buff[16];
@@ -379,7 +382,7 @@ void QD3DWiew::DrawFps()
 		pFont_->DrawTextA(NULL, buff, -1, &TextRect, DT_WORDBREAK |DT_VCENTER | DT_CENTER, D3DCOLOR_XRGB(255,0,255));
 }
 
-void QD3DWiew::InitializeValue()
+void cQD3DView::InitializeValue()
 {
 	addTime_ = 0;
 	callCnt = 0;
@@ -394,7 +397,7 @@ void QD3DWiew::InitializeValue()
 	mapCellNum_ = 0;
 }
 
-void QD3DWiew::InitializeCamera()
+void cQD3DView::InitializeCamera()
 {
 	if(!pModelviewCam_)
 		pModelviewCam_ = new CModelViewerCamera();
@@ -417,12 +420,12 @@ void QD3DWiew::InitializeCamera()
 		GetModelViewCamera()->GetWorldMatrix());
 }
 
-CModelViewerCamera* QD3DWiew::GetModelViewCamera()
+CModelViewerCamera* cQD3DView::GetModelViewCamera()
 {
 	return (CModelViewerCamera*)pModelviewCam_;
 }
 
-void QD3DWiew::SetupCamera()
+void cQD3DView::SetupCamera()
 {
 	if(pModelviewCam_)
 	{
@@ -432,7 +435,7 @@ void QD3DWiew::SetupCamera()
 	}
 }
 
-void QD3DWiew::SetRenderMode(renderMode mode)
+void cQD3DView::SetRenderMode(renderMode mode)
 {
 	if(mode == rdSolid)
 		isWireMode_ = false;
@@ -440,12 +443,12 @@ void QD3DWiew::SetRenderMode(renderMode mode)
 		isWireMode_ = true;
 }
 
-bool QD3DWiew::ImportHeightmap(QString filename)
+bool cQD3DView::ImportHeightmap(QString filename)
 {	
-	if(!pTextureManager)
+	if(!pcTextureManager)
 		return false;
 
-	LPDIRECT3DTEXTURE9 pTexture = pTextureManager->LoadTextureFromFile(filename.toStdString());
+	LPDIRECT3DTEXTURE9 pTexture = pcTextureManager->LoadTextureFromFile(filename.toStdString());
 	if(!pTexture)
 		return false;
 
@@ -464,7 +467,7 @@ bool QD3DWiew::ImportHeightmap(QString filename)
 	return true;
 }
 
-bool QD3DWiew::InitVBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
+bool cQD3DView::InitVBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
 {
 	if(pVB_)
 		SAFE_RELEASE(pVB_);
@@ -494,7 +497,7 @@ bool QD3DWiew::InitVBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
 		for(DWORD x = 0 ; x < mapCellNum_ ; ++x)
 		{
 			v.pos.x = x * CELL_SIZE / 2.0f;		//원점 정렬
-			v.pos.z = (z * CELL_SIZE / 2.0f);	//z좌표가 반대임으로 -
+			v.pos.z = -(z * CELL_SIZE / 2.0f);	//z좌표가 반대임으로 -
 			v.pos.y = (float)(*((LPDWORD)textureRect.pBits + x + z * (textureRect.Pitch/4)) & 0x000000ff) * CELL_HEIGHT;
 			v.n.x = 0.f;//v.pos.x;
 			v.n.y = v.pos.y;
@@ -518,7 +521,7 @@ bool QD3DWiew::InitVBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
 	return true;
 }
 
-bool QD3DWiew::InitIBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
+bool cQD3DView::InitIBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
 {
 	if(pIB_)
 		SAFE_RELEASE(pIB_);
@@ -560,7 +563,7 @@ bool QD3DWiew::InitIBforHeightmap(LPDIRECT3DTEXTURE9 pTexture)
 	return true;
 }
 
-D3DMATERIAL9 QD3DWiew::InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR e, float p)
+D3DMATERIAL9 cQD3DView::InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR e, float p)
 {
 	D3DMATERIAL9 mtrl;
 	mtrl.Ambient  = a;
@@ -571,7 +574,7 @@ D3DMATERIAL9 QD3DWiew::InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR
 	return mtrl;
 }
 
-D3DLIGHT9 QD3DWiew::InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color)
+D3DLIGHT9 cQD3DView::InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color)
 {
 	D3DLIGHT9 light;
 	::ZeroMemory(&light, sizeof(light));
@@ -585,7 +588,7 @@ D3DLIGHT9 QD3DWiew::InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* colo
 	return light;
 }
 
-void QD3DWiew::RenderHeightMap()
+void cQD3DView::RenderHeightMap()
 {	
 	if(mapCellNum_ == 0)
 		return;
@@ -601,7 +604,7 @@ void QD3DWiew::RenderHeightMap()
 		(mapCellNum_ - 1) * (mapCellNum_ - 1) * 2);
 }
 
-void QD3DWiew::SetupLight()
+void cQD3DView::SetupLight()
 {
 	D3DXVECTOR3 dir(-2.0f, 0.0f, 0.507f);
 	D3DXCOLOR col(0.9f, 0.9f, 1.0f, 1.0f);

@@ -4,7 +4,7 @@
 #include <QtGui/QMainWindow>
 #include "ui_mapeditord3d.h"
 
-class QD3DWiew;
+class cQD3DView;
 class MapEditorD3D : public QMainWindow
 {
 	Q_OBJECT
@@ -20,7 +20,7 @@ public slots:
 
 private:
 	Ui::MapEditorD3DClass ui;
-	QD3DWiew* pD3DWidget_;
+	cQD3DView* pD3DWidget_;
 };
 
 #endif // MAPEDITORD3D_H
