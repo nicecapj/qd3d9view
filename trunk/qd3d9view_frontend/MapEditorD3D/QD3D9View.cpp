@@ -83,10 +83,14 @@ void cQD3DView::Render()
 		//SetupLight();
 
 		if(mapCellNum_ == 0)
+		{
 			//RenderGeometryForTest();
-			pTestRoutine_->RenderSLODTileForTest();
+			RenderSLODTileForTest();
+		}
 		else
+		{
 			RenderHeightMap();
+		}
 		DrawFps();
 
 		EndScene();						
@@ -262,6 +266,9 @@ HRESULT cQD3DView::Initialize()
 	pTestRoutine_ = new cTestRoutine(this);
 	pcTextureManager = new cTextureManager(pDevice_);
 
+	//★ abnormal using, pre alloc for test routine;
+	pDevice_->CreateVertexBuffer(128 * 128 * 28, 0, D3DFVF_TERRAIN, D3DPOOL_DEFAULT, &pVB_, NULL);
+
 	RestoreDeviceObjects();
 	
 
@@ -291,7 +298,15 @@ HRESULT	cQD3DView::RestoreDeviceObjects()
 	InitializeFont();
 	InitializeCamera();
 	//pTestRoutine_->InitGeometryForTest();		
-	pTestRoutine_->InitVBIBforTLODTest();
+	
+	if(!loadedHeightmapfilename_.isEmpty())
+	{
+		ImportHeightmap(loadedHeightmapfilename_);
+	}
+	else
+	{
+		InitVBIBforTLODTest();
+	}	
 
 	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE);
 	pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
@@ -410,7 +425,7 @@ void cQD3DView::InitializeCamera()
 
 	//DX 카메라
 	pModelviewCam_->SetViewParams(&eyePos_, &vLookatPt);
-	pModelviewCam_->SetProjParams(D3DX_PI / 4, 1.0f, 1.0f, 1000.f);	
+	pModelviewCam_->SetProjParams(D3DX_PI / 4, 1.0f, 1.0f, 10000.f);	
 	GetModelViewCamera()->SetWindow(windowSize_.width(), windowSize_.height());
 
 	//스크린 공간으로 투영(글짜 출력용)
@@ -451,6 +466,8 @@ bool cQD3DView::ImportHeightmap(QString filename)
 	LPDIRECT3DTEXTURE9 pTexture = pcTextureManager->LoadTextureFromFile(filename.toStdString());
 	if(!pTexture)
 		return false;
+
+	loadedHeightmapfilename_ = filename;
 
 	D3DSURFACE_DESC desc;
 	pTexture->GetLevelDesc(0, &desc);
@@ -593,9 +610,9 @@ void cQD3DView::RenderHeightMap()
 	if(mapCellNum_ == 0)
 		return;
 
-	pDevice_->SetStreamSource(0, pVB_, 0, sizeof(D3DFVF_TERRAIN));
-	pDevice_->SetFVF(D3DFVF_TERRAIN);
+	pDevice_->SetStreamSource(0, pVB_, 0, sizeof(TerrainVertex));
 	pDevice_->SetIndices(pIB_);	
+	pDevice_->SetFVF(D3DFVF_TERRAIN);	
 	pDevice_->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 		0,
 		0,
@@ -618,4 +635,14 @@ void cQD3DView::SetupLight()
 	pDevice_->SetRenderState(D3DRS_SPECULARENABLE, true);
 
 	pDevice_->LightEnable(0, true);
+}
+
+void cQD3DView::ReleaseVertexBuffer()
+{
+	SAFE_RELEASE(pVB_);
+}
+
+void cQD3DView::ReleaseIndexBuffer()
+{	
+	SAFE_RELEASE(pIB_);	
 }
