@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mapeditord3d.h'
 **
-** Created: Mon Feb 13 03:18:52 2012
+** Created: Thu Feb 16 02:35:42 2012
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.3)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_MapEditorD3D[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       4,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -34,6 +34,7 @@ static const uint qt_meta_data_MapEditorD3D[] = {
       14,   13,   13,   13, 0x0a,
       34,   13,   13,   13, 0x0a,
       60,   13,   55,   13, 0x0a,
+      78,   13,   13,   13, 0x0a,
 
        0        // eod
 };
@@ -41,6 +42,7 @@ static const uint qt_meta_data_MapEditorD3D[] = {
 static const char qt_meta_stringdata_MapEditorD3D[] = {
     "MapEditorD3D\0\0SetRenderModeWire()\0"
     "SetRenderModeSolid()\0bool\0ImportHeightmap()\0"
+    "ShowLightDlg()\0"
 };
 
 const QMetaObject MapEditorD3D::staticMetaObject = {
@@ -76,9 +78,10 @@ int MapEditorD3D::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 1: SetRenderModeSolid(); break;
         case 2: { bool _r = ImportHeightmap();
             if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+        case 3: ShowLightDlg(); break;
         default: ;
         }
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }

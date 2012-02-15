@@ -32,6 +32,7 @@ MapEditorD3D::MapEditorD3D(QWidget *parent, Qt::WFlags flags)
 			QObject::connect(ui.actionWire, SIGNAL(triggered()), this, SLOT(SetRenderModeWire()));    
 			QObject::connect(ui.actionSolid, SIGNAL(triggered()), this, SLOT(SetRenderModeSolid()));    
 			QObject::connect(ui.actionImportHeightmap, SIGNAL(triggered()), this, SLOT(ImportHeightmap()));    
+			QObject::connect(ui.actionLight, SIGNAL(triggered()), this, SLOT(ShowLightDlg()));
 		}
 
 		//pD3DWidget_->show();
@@ -67,4 +68,9 @@ bool MapEditorD3D::ImportHeightmap()
 		return false;
 
 	return pD3DWidget_->ImportHeightmap(selectName);	
+}
+
+void MapEditorD3D::ShowLightDlg()
+{
+	return pD3DWidget_->ShowLightDlg();
 }
