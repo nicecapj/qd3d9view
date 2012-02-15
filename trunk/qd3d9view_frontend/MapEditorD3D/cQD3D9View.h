@@ -23,6 +23,7 @@ class CBaseCamera;
 class CModelViewerCamera;
 class cTextureManager;
 class cTestRoutine;
+class cLightDlg;
 class cQD3DView : public QWidget
 {
 	Q_OBJECT
@@ -57,6 +58,8 @@ public:
 	cTextureManager* GetcTextureManager() { return pcTextureManager; }
 	LPDIRECT3DVERTEXBUFFER9 GetVertexBuffer() { return pVB_; }
 	LPDIRECT3DINDEXBUFFER9 GetIndexBuffer() { return pIB_; }	
+
+	void ShowLightDlg();
 
 public slots:
 		void Idle();
@@ -186,6 +189,7 @@ private:
 
 	cTextureManager* pcTextureManager;
 	cTestRoutine* pTestRoutine_;
+	cLightDlg* pLightDlg_;
 };
 
 #endif  __QT_DIRECTX_WIEW_H__

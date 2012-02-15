@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>934</width>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>934</width>
      <height>17</height>
     </rect>
    </property>
@@ -48,8 +48,15 @@
     </widget>
     <addaction name="menuImport"/>
    </widget>
+   <widget class="QMenu" name="menuSetting">
+    <property name="title">
+     <string>Setting</string>
+    </property>
+    <addaction name="actionLight"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuRender"/>
+   <addaction name="menuSetting"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -78,6 +85,11 @@
   <action name="actionImportHeightmap">
    <property name="text">
     <string>Heightmap</string>
+   </property>
+  </action>
+  <action name="actionLight">
+   <property name="text">
+    <string>Light</string>
    </property>
   </action>
  </widget>

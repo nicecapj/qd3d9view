@@ -13,6 +13,7 @@ purpose:	directx 9.0 control for QT
 #include "defineForTest.h"
 #include "cTextureManager.h"
 #include "cTestRoutine.h"
+#include "cLightDlg.h"
 
 #define DXUT_AUTOLIB
 #include "../DXUtil/DXUT.h"
@@ -50,7 +51,7 @@ cQD3DView::cQD3DView(QWidget *parent, Qt::WFlags flags)
 	timer_.setParent( parent );
 	timer_.setInterval(1);	//최대 해상도로 1/1000
 	timer_.setSingleShot( false ) ;		//정해진 시간후에 한번 호출하는 방식은 사용하지 않는다.
-	QObject::connect( &timer_, SIGNAL( timeout() ), this, SLOT( Idle() ) ) ;
+	QObject::connect( &timer_, SIGNAL( timeout() ), this, SLOT( Idle() ) ) ;	
 
 	InitializeValue();		
 }
@@ -265,6 +266,7 @@ HRESULT cQD3DView::Initialize()
 
 	pTestRoutine_ = new cTestRoutine(this);
 	pcTextureManager = new cTextureManager(pDevice_);
+	pLightDlg_ = new cLightDlg();
 
 	//★ abnormal using, pre alloc for test routine;
 	pDevice_->CreateVertexBuffer(128 * 128 * 28, 0, D3DFVF_TERRAIN, D3DPOOL_DEFAULT, &pVB_, NULL);
@@ -281,7 +283,8 @@ HRESULT cQD3DView::Initialize()
 void cQD3DView::Finalize()
 {	
 	InvalidateDeviceObjects();		
-
+	
+	SAFE_DELETE(pLightDlg_);
 	SAFE_DELETE(pcTextureManager);
 	SAFE_DELETE(pModelviewCam_);
 	SAFE_RELEASE(pDevice_);
@@ -301,15 +304,20 @@ HRESULT	cQD3DView::RestoreDeviceObjects()
 	
 	if(!loadedHeightmapfilename_.isEmpty())
 	{
+		pDevice_->SetRenderState( D3DRS_LIGHTING, TRUE);
+		pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+
+		SetupLight();
+		eyePos_.z = -1000;
 		ImportHeightmap(loadedHeightmapfilename_);
 	}
 	else
 	{
+		pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE);
+		pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 		InitVBIBforTLODTest();
 	}	
 
-	pDevice_->SetRenderState( D3DRS_LIGHTING, FALSE);
-	pDevice_->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 	//pDevice_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
 
 	timer_.start();
@@ -635,4 +643,12 @@ void cQD3DView::SetupLight()
 	pDevice_->SetRenderState(D3DRS_SPECULARENABLE, true);
 
 	pDevice_->LightEnable(0, true);
+}
+
+void cQD3DView::ShowLightDlg()
+{
+	if(pLightDlg_)
+	{
+		pLightDlg_->show();
+	}
 }

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mapeditord3d.ui'
 **
-** Created: Mon Feb 13 03:18:52 2012
+** Created: Thu Feb 16 02:10:40 2012
 **      by: Qt User Interface Compiler version 4.7.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -31,12 +31,14 @@ public:
     QAction *actionWire;
     QAction *actionOepn;
     QAction *actionImportHeightmap;
+    QAction *actionLight;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuRender;
     QMenu *menuRenderMode;
     QMenu *menuFile;
     QMenu *menuImport;
+    QMenu *menuSetting;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -44,7 +46,7 @@ public:
     {
         if (MapEditorD3DClass->objectName().isEmpty())
             MapEditorD3DClass->setObjectName(QString::fromUtf8("MapEditorD3DClass"));
-        MapEditorD3DClass->resize(600, 400);
+        MapEditorD3DClass->resize(934, 740);
         actionSolid = new QAction(MapEditorD3DClass);
         actionSolid->setObjectName(QString::fromUtf8("actionSolid"));
         actionWire = new QAction(MapEditorD3DClass);
@@ -53,12 +55,14 @@ public:
         actionOepn->setObjectName(QString::fromUtf8("actionOepn"));
         actionImportHeightmap = new QAction(MapEditorD3DClass);
         actionImportHeightmap->setObjectName(QString::fromUtf8("actionImportHeightmap"));
+        actionLight = new QAction(MapEditorD3DClass);
+        actionLight->setObjectName(QString::fromUtf8("actionLight"));
         centralWidget = new QWidget(MapEditorD3DClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         MapEditorD3DClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MapEditorD3DClass);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 600, 17));
+        menuBar->setGeometry(QRect(0, 0, 934, 17));
         menuRender = new QMenu(menuBar);
         menuRender->setObjectName(QString::fromUtf8("menuRender"));
         menuRenderMode = new QMenu(menuRender);
@@ -67,6 +71,8 @@ public:
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuImport = new QMenu(menuFile);
         menuImport->setObjectName(QString::fromUtf8("menuImport"));
+        menuSetting = new QMenu(menuBar);
+        menuSetting->setObjectName(QString::fromUtf8("menuSetting"));
         MapEditorD3DClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MapEditorD3DClass);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -77,11 +83,13 @@ public:
 
         menuBar->addAction(menuFile->menuAction());
         menuBar->addAction(menuRender->menuAction());
+        menuBar->addAction(menuSetting->menuAction());
         menuRender->addAction(menuRenderMode->menuAction());
         menuRenderMode->addAction(actionSolid);
         menuRenderMode->addAction(actionWire);
         menuFile->addAction(menuImport->menuAction());
         menuImport->addAction(actionImportHeightmap);
+        menuSetting->addAction(actionLight);
 
         retranslateUi(MapEditorD3DClass);
 
@@ -95,10 +103,12 @@ public:
         actionWire->setText(QApplication::translate("MapEditorD3DClass", "Wire", 0, QApplication::UnicodeUTF8));
         actionOepn->setText(QApplication::translate("MapEditorD3DClass", "Oepn", 0, QApplication::UnicodeUTF8));
         actionImportHeightmap->setText(QApplication::translate("MapEditorD3DClass", "Heightmap", 0, QApplication::UnicodeUTF8));
+        actionLight->setText(QApplication::translate("MapEditorD3DClass", "Light", 0, QApplication::UnicodeUTF8));
         menuRender->setTitle(QApplication::translate("MapEditorD3DClass", "Render", 0, QApplication::UnicodeUTF8));
         menuRenderMode->setTitle(QApplication::translate("MapEditorD3DClass", "Render Mode", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MapEditorD3DClass", "File", 0, QApplication::UnicodeUTF8));
         menuImport->setTitle(QApplication::translate("MapEditorD3DClass", "Import", 0, QApplication::UnicodeUTF8));
+        menuSetting->setTitle(QApplication::translate("MapEditorD3DClass", "Setting", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };
