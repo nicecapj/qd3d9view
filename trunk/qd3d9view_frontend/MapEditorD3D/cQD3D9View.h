@@ -58,6 +58,7 @@ public:
 	cTextureManager* GetcTextureManager() { return pcTextureManager; }
 	LPDIRECT3DVERTEXBUFFER9 GetVertexBuffer() { return pVB_; }
 	LPDIRECT3DINDEXBUFFER9 GetIndexBuffer() { return pIB_; }	
+	void SetupLight(D3DLIGHT9 light);
 
 	void ShowLightDlg();
 
@@ -138,7 +139,7 @@ private:
 
 	D3DMATERIAL9 InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR e, float p);
 	D3DLIGHT9 InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color);
-	void	SetupLight();
+	void	SetupLight();	
 	void    RenderHeightMap();
 	UINT	mapCellNum_;	
 
@@ -172,7 +173,9 @@ private:
 	
 	float fps_;
 	float addTime_;
-	int   callCnt;	
+	int   callCnt;
+
+	D3DLIGHT9 light_;
 	
 
 	QPoint startMousePos_;
