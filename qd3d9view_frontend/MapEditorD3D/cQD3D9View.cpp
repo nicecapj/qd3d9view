@@ -90,6 +90,7 @@ void cQD3DView::Render()
 		}
 		else
 		{
+			SetupLight();
 			RenderHeightMap();
 		}
 		DrawFps();
@@ -266,13 +267,13 @@ HRESULT cQD3DView::Initialize()
 
 	pTestRoutine_ = new cTestRoutine(this);
 	pcTextureManager = new cTextureManager(pDevice_);
-	pLightDlg_ = new cLightDlg();
+	pLightDlg_ = new cLightDlg(this);
 
 	//★ abnormal using, pre alloc for test routine;
 	pDevice_->CreateVertexBuffer(128 * 128 * 28, 0, D3DFVF_TERRAIN, D3DPOOL_DEFAULT, &pVB_, NULL);
 
-	RestoreDeviceObjects();
-	
+
+	RestoreDeviceObjects();	
 
 
 	timer_.start();
@@ -288,7 +289,7 @@ void cQD3DView::Finalize()
 	SAFE_DELETE(pcTextureManager);
 	SAFE_DELETE(pModelviewCam_);
 	SAFE_RELEASE(pDevice_);
-	SAFE_RELEASE(pD3D_);	
+	SAFE_RELEASE(pD3D_);		
 }
 
 //복구 처리
@@ -301,7 +302,11 @@ HRESULT	cQD3DView::RestoreDeviceObjects()
 	InitializeFont();
 	InitializeCamera();
 	//pTestRoutine_->InitGeometryForTest();		
-	
+
+	D3DXVECTOR3 dir(-2.0f, 0.0f, 0.507f);
+	D3DXCOLOR col(0.9f, 0.9f, 1.0f, 1.0f);
+	light_ = InitDirectionalLight(&dir, &col);
+
 	if(!loadedHeightmapfilename_.isEmpty())
 	{
 		pDevice_->SetRenderState( D3DRS_LIGHTING, TRUE);
@@ -631,24 +636,34 @@ void cQD3DView::RenderHeightMap()
 
 void cQD3DView::SetupLight()
 {
-	D3DXVECTOR3 dir(-2.0f, 0.0f, 0.507f);
-	D3DXCOLOR col(0.9f, 0.9f, 1.0f, 1.0f);
-	D3DLIGHT9 light = InitDirectionalLight(&dir, &col);
+	if(pDevice_)
+	{
+		D3DMATERIAL9 mtrl  = InitMtrl(WHITE, WHITE, WHITE, BLACK, 2.0f);
+		pDevice_->SetMaterial(&mtrl);
 
-	D3DMATERIAL9 mtrl  = InitMtrl(WHITE, WHITE, WHITE, BLACK, 2.0f);
-	pDevice_->SetMaterial(&mtrl);
+		pDevice_->SetLight(0, &light_);
+		pDevice_->SetRenderState(D3DRS_NORMALIZENORMALS, true);
+		pDevice_->SetRenderState(D3DRS_SPECULARENABLE, true);
 
-	pDevice_->SetLight(0, &light);
-	pDevice_->SetRenderState(D3DRS_NORMALIZENORMALS, true);
-	pDevice_->SetRenderState(D3DRS_SPECULARENABLE, true);
+		pDevice_->LightEnable(0, true);
+	}
+}
 
-	pDevice_->LightEnable(0, true);
+void cQD3DView::SetupLight(D3DLIGHT9 light)
+{
+	light_ = light;
+	if(pDevice_)
+		pDevice_->SetLight(0, &light_);	
 }
 
 void cQD3DView::ShowLightDlg()
 {
 	if(pLightDlg_)
 	{
+		D3DLIGHT9 light;
+		pDevice_->GetLight(0, &light);
+		pLightDlg_->SetLight(light);
+
 		pLightDlg_->show();
 	}
 }
